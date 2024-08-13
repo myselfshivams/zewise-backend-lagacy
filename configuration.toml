@@ -1,0 +1,13 @@
+[server]
+    port = 3000
+
+[database]
+    host = "localhost"
+    port = 5432
+    user = "wp233"
+    password = "114514"
+    db_name = "neko"
+
+[env]
+    # development, production
+    type = "development"
