@@ -63,7 +63,7 @@ func (store *UserStore) RegisterUser(username string, salt string, hashedPasswor
 //   - error：如果在获取过程中发生错误，则返回相应的错误信息，否则返回nil。
 func (store *UserStore) GetUserByUsername(username string) (*models.UserInfo, error) {
 	user := new(models.UserInfo)
-	result := store.db.Where("user_name = ?", username).First(user)
+	result := store.db.Where("username = ?", username).First(user)
 	if result.Error != nil {
 		return nil, result.Error
 	}

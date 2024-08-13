@@ -3,8 +3,8 @@ package controllers
 import (
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/Kirisakiii/neko-micro-blog-backend/serializers"
 	"github.com/Kirisakiii/neko-micro-blog-backend/services"
+	"github.com/Kirisakiii/neko-micro-blog-backend/utils/serializers"
 )
 
 // UserController 用户控制器
@@ -44,16 +44,15 @@ func (controller *UserController) NewRegisterHandler() fiber.Handler {
 		}
 
 		// 注册用户
-		err = controller.userService.RegisterUser(reqBody.Username ,reqBody.Password)
-
-		// 返回结果
+		err = controller.userService.RegisterUser(reqBody.Username, reqBody.Password)
 		if err != nil {
 			return ctx.Status(200).JSON(
-				serializers.NewResponse(1, err.Error()),
+				serializers.NewResponse(2, err.Error()),
 			)
 		}
 
-		return ctx.Status(0).JSON(
+		// 返回结果
+		return ctx.Status(200).JSON(
 			serializers.NewResponse(0, "succeed"),
 		)
 	}
