@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -26,6 +27,12 @@ type Config struct {
 		// 数据库名称
 		DBName string `toml:"db_name"`
 	} `toml:"database"`
+
+	// 压缩设置
+	Compress struct {
+		// 压缩等级
+		Level compress.Level `toml:"compress"`
+	}
 
 	// 环境设置
 	Env struct {

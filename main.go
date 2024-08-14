@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
@@ -100,6 +101,9 @@ func main() {
 	app := fiber.New()
 	app.Use(fiberLogger.New(fiberLogger.Config{
 		Format: "[${time}][${latency}][${status}][${method}] ${path}\n",
+	}))
+	app.Use(compress.New(compress.Config{
+		Level: cfg.Compress.Level,
 	}))
 
 	// 静态资源路由
