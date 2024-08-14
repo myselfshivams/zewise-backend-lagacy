@@ -53,6 +53,23 @@ func (store *UserStore) RegisterUser(username string, salt string, hashedPasswor
 	return nil
 }
 
+// GetUserByUID 通过用户ID获取用户信息。
+//
+// 参数：
+//   - uid：用户ID
+//
+// 返回值：
+//   - *models.UserInfo：如果找到了相应的用户信息，则返回该用户信息，否则返回nil。
+//   - error：如果在获取过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) GetUserByUID(uid uint64) (*models.UserInfo, error) {
+	user := new(models.UserInfo)
+	result := store.db.Where("id = ?", uid).First(user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return user, nil
+}
+
 // GetUserByUsername 通过用户名获取用户信息。
 //
 // 参数：

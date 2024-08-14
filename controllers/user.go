@@ -1,8 +1,13 @@
 package controllers
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"errors"
+	"strconv"
 
+	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
+
+	"github.com/Kirisakiii/neko-micro-blog-backend/models"
 	"github.com/Kirisakiii/neko-micro-blog-backend/services"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/serializers"
 )
@@ -19,6 +24,56 @@ type UserController struct {
 func (factory *Factory) NewUserController() *UserController {
 	return &UserController{
 		userService: factory.serviceFactory.NewUserService(),
+	}
+}
+
+// NewProfileHandler 返回获取用户资料的处理函数。
+//
+// 返回值：
+//   - fiber.Handler：新的获取用户资料的处理函数。
+func (controller *UserController) NewProfileHandler() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		// 判断传入的查询参数是UID还是Username
+		uidStr := ctx.Query("uid")
+		username := ctx.Query("username")
+		if uidStr == "" && username == "" {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(1, "parameter uid or username is required"),
+			)
+		}
+
+		// 获取用户信息
+		var (
+			user *models.UserInfo
+			err  error
+		)
+		if uidStr != "" {
+			var uid uint64
+			uid, err = strconv.ParseUint(uidStr, 10, 64)
+			if err != nil {
+				return ctx.Status(200).JSON(
+					serializers.NewResponse(1, err.Error()),
+				)
+			}
+			user, err = controller.userService.GetUserInfoByUID(uid)
+		} else {
+			user, err = controller.userService.GetUserInfoByUsername(username)
+		}
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ctx.Status(200).JSON(
+					serializers.NewResponse(2, "user does not exist"),
+				)
+			}
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(2, err.Error()),
+			)
+		}
+
+		// 返回结果
+		return ctx.Status(200).JSON(
+			serializers.NewResponse(0, "", serializers.NewUserProfileData(user)),
+		)
 	}
 }
 
