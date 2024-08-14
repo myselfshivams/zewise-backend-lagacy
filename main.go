@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -100,14 +101,13 @@ func main() {
 	app.Use(fiberLogger.New(fiberLogger.Config{
 		Format: "[${time}][${latency}][${status}][${method}] ${path}\n",
 	}))
+	api := app.Group("/api")
 
 	// User 路由
 	userController := controllerFactory.NewUserController()
-	app.Get("/api/user/profile", userController.NewProfileHandler())    // 查询用户信息
-	app.Post("/api/user/register", userController.NewRegisterHandler()) // 用户注册
+	user := api.Group("/user")
+	user.Get("/profile", userController.NewProfileHandler())    // 查询用户信息
+	user.Post("/register", userController.NewRegisterHandler()) // 用户注册
 
-	err := app.Listen(fmt.Sprintf(":%d", cfg.Server.Port))
-	if err != nil {
-		logger.Panicln(err.Error())
-	}
+	log.Fatal(app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)))
 }
