@@ -82,7 +82,10 @@ func init() {
 
 	// 迁移模型
 	logger.Debugln("正在迁移数据表模型...")
-	models.Migrate(db)
+	err = models.Migrate(db)
+	if err != nil {
+		logger.Panicln("迁移数据库模型失败：", err.Error())
+	}
 
 	// 建立控制器层工厂
 	controllerFactory = controllers.NewFactory(
@@ -103,5 +106,8 @@ func main() {
 	app.Get("/api/user/profile", userController.NewProfileHandler())    // 查询用户信息
 	app.Post("/api/user/register", userController.NewRegisterHandler()) // 用户注册
 
-	app.Listen(fmt.Sprintf(":%d", cfg.Server.Port))
+	err := app.Listen(fmt.Sprintf(":%d", cfg.Server.Port))
+	if err != nil {
+		logger.Panicln(err.Error())
+	}
 }
