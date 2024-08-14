@@ -101,6 +101,12 @@ func main() {
 	app.Use(fiberLogger.New(fiberLogger.Config{
 		Format: "[${time}][${latency}][${status}][${method}] ${path}\n",
 	}))
+
+	// 静态资源路由
+	resource := app.Group("/resources")
+	resource.Static("/avatar", "./public/avatars") // 头像资源路由
+
+	// api 路由
 	api := app.Group("/api")
 
 	// User 路由
