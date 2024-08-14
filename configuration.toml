@@ -8,6 +8,13 @@
     password = "114514"
     db_name = "neko"
 
+[compress]
+# LevelDisabled (-1): Compression is disabled.
+# LevelDefault (0): Default compression level.
+# LevelBestSpeed (1): Best compression speed.
+# LevelBestCompression (2): Best compression.
+    level = 2
+
 [env]
     # development, production
     type = "development"
