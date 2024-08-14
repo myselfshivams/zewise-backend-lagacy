@@ -3,12 +3,15 @@ package controllers
 import (
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mssola/useragent"
 	"gorm.io/gorm"
 
 	"github.com/Kirisakiii/neko-micro-blog-backend/models"
 	"github.com/Kirisakiii/neko-micro-blog-backend/services"
+	"github.com/Kirisakiii/neko-micro-blog-backend/types"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/serializers"
 )
 
@@ -82,16 +85,10 @@ func (controller *UserController) NewProfileHandler() fiber.Handler {
 // 返回值：
 //   - fiber.Handler：新的注册用户的处理函数。
 func (controller *UserController) NewRegisterHandler() fiber.Handler {
-	// Body 请求结构
-	type Body struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
-
 	return func(ctx *fiber.Ctx) error {
 		// 解析请求体
-		reqBody := new(Body)
-		err := ctx.BodyParser(&reqBody)
+		reqBody := new(types.AuthBody)
+		err := ctx.BodyParser(reqBody)
 		if err != nil {
 			return ctx.Status(200).JSON(
 				serializers.NewResponse(1, err.Error()),
@@ -109,6 +106,47 @@ func (controller *UserController) NewRegisterHandler() fiber.Handler {
 		// 返回结果
 		return ctx.Status(200).JSON(
 			serializers.NewResponse(0, "succeed"),
+		)
+	}
+}
+
+// NewLoginHandler 返回登陆用户的处理函数。
+//
+// 返回值：
+//   - fiber.Handler：新的登陆用户的处理函数。
+func (controller *UserController) NewLoginHandler() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		// 解析请求体
+		reqBody := new(types.AuthBody)
+		err := ctx.BodyParser(reqBody)
+		if err != nil {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(1, err.Error()),
+			)
+		}
+
+		// 解析 UA
+		userAgentString := ctx.Get("User-Agent")
+		ua := useragent.New(userAgentString)
+		browser, version := ua.Browser()
+		var sb strings.Builder
+		sb.WriteString(browser)
+		sb.WriteString(" ")
+		sb.WriteString(version)
+		browserInfo := sb.String()
+		os := ua.OSInfo().FullName
+
+		// 登陆
+		token, err := controller.userService.LoginUser(reqBody.Username, reqBody.Password, ctx.IP(), browserInfo, os)
+		if err != nil {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(2, err.Error()),
+			)
+		}
+
+		// 返回结果
+		return ctx.Status(200).JSON(
+			serializers.NewResponse(0, "succeed", serializers.NewUserToken(token)),
 		)
 	}
 }

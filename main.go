@@ -108,10 +108,7 @@ func main() {
 
 	// 静态资源路由
 	resource := app.Group("/resources")
-	// 头像资源路由
-	resource.Static("/avatar", "./public/avatars", fiber.Static{
-		Compress: true,
-	})
+	resource.Static("/avatar", "./public/avatars") // 头像资源路由
 
 	// api 路由
 	api := app.Group("/api")
@@ -121,6 +118,7 @@ func main() {
 	user := api.Group("/user")
 	user.Get("/profile", userController.NewProfileHandler())    // 查询用户信息
 	user.Post("/register", userController.NewRegisterHandler()) // 用户注册
+	user.Post("/login", userController.NewLoginHandler())       // 用户登录
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)))
 }
