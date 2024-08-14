@@ -5,7 +5,9 @@ Copyright (c) [2024], Author(s):
 */
 package encryptor
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"golang.org/x/crypto/bcrypt"
+)
 
 // HashPassword 生成哈希密码。
 //
@@ -28,4 +30,19 @@ func HashPassword(password string, salt string) (string, error) {
 	}
 
 	return string(hashedPassword), nil
+}
+
+// CompareHashPassword 比较哈希密码。
+//
+// 参数：
+//   - hashedPassword：哈希密码
+//   - password：密码
+//   - salt：盐
+//
+// 返回值：
+//   - error：如果密码匹配，则返回nil，否则返回相应的错误信息。
+func CompareHashPassword(hashedPassword string, password string, salt string) error {
+	passwordWithSalt := append([]byte(password), []byte(salt)...)
+
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), passwordWithSalt)
 }

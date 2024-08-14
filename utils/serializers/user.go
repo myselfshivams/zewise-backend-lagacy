@@ -48,3 +48,19 @@ func NewUserProfileData(model *models.UserInfo) *UserProfileData {
 
 	return profile
 }
+
+// UserToken
+type UserToken struct {
+	Token string `json:"token"`
+}
+
+// NewUserToken 创建一个新的用户 Token 响应。
+//
+// 参数：
+//   - token：用户 Token
+//
+// 返回值：
+//   - *UserToken：新的用户 Token 响应结构体。
+func NewUserToken(token string) *UserToken {
+	return &UserToken{Token: token}
+}

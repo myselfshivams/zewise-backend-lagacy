@@ -118,6 +118,7 @@ func main() {
 	user := api.Group("/user")
 	user.Get("/profile", userController.NewProfileHandler())    // 查询用户信息
 	user.Post("/register", userController.NewRegisterHandler()) // 用户注册
+	user.Post("/login", userController.NewLoginHandler())       // 用户登录
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)))
 }

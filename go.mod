@@ -3,6 +3,8 @@ module github.com/Kirisakiii/neko-micro-blog-backend
 go 1.21.6
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.2.0
+	github.com/mssola/useragent v1.0.0
 	github.com/pelletier/go-toml/v2 v2.1.1
 	github.com/sirupsen/logrus v1.9.3
 )
@@ -10,7 +12,7 @@ require (
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/gofiber/fiber/v2 v2.52.1
-	github.com/google/uuid v1.6.0 // indirect
+	github.com/google/uuid v1.6.0
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
 	github.com/jackc/pgx/v5 v5.5.3 // indirect

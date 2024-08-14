@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/Kirisakiii/neko-micro-blog-backend/models"
+	"github.com/Kirisakiii/neko-micro-blog-backend/types"
 )
 
 // UserStore 用户信息数据库
@@ -85,4 +86,60 @@ func (store *UserStore) GetUserByUsername(username string) (*models.UserInfo, er
 		return nil, result.Error
 	}
 	return user, nil
+}
+
+// GetUserAuthInfo 通过用户名获取用户的认证信息。
+//
+// 参数：
+//   - username：用户名
+//
+// 返回值：
+//   - *models.UserAuthInfo：如果找到了相应的用户认证信息，则返回该用户认证信息，否则返回nil。
+//   - error：如果在获取过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) GetUserAuthInfo(username string) (*models.UserAuthInfo, error) {
+	userAuthInfo := new(models.UserAuthInfo)
+	result := store.db.Where("username = ?", username).First(userAuthInfo)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return userAuthInfo, nil
+}
+
+// InsertUserLoginLog 插入用户登录日志。
+//
+// 参数：
+//   - userLoginLogInfo：用户登录日志信息
+//
+// 返回值：
+//   - error：如果在插入过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) CreateUserLoginLog(userLoginLogInfo *models.UserLoginLog) error {
+	result := store.db.Create(userLoginLogInfo)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+// BanToken 将用户 Token 加入黑名单。
+//
+// 参数：
+//   - token：Token
+//   - claims：Token 中的声明
+//
+// 返回值：
+//   - error：如果在插入过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) BanToken(token string, claims *types.BearerTokenClaims) error {
+	userBannedToken := &models.UserBannedToken{
+		UID:        claims.UID,
+		Username:   claims.Username,
+		Token:      token,
+		ExpireTime: claims.ExpiresAt.Time,
+	}
+
+	result := store.db.Create(userBannedToken)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }
