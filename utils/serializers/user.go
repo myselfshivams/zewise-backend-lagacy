@@ -33,7 +33,7 @@ func NewUserProfileData(model *models.UserInfo) *UserProfileData {
 	} else {
 		profile.NickName = model.UserName
 	}
-	profile.Avatar = fmt.Sprintf("/resources/avatar/%s.jpg", model.Avatar)
+	profile.Avatar = fmt.Sprintf("/resources/avatar/%s.webp", model.Avatar)
 	if model.Birth != nil {
 		profile.Birth = model.Birth.Format("2006-01-02")
 	} else {
