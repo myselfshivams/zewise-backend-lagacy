@@ -3,12 +3,14 @@ package services
 import (
 	"errors"
 
+	"gorm.io/gorm"
+
 	"github.com/Kirisakiii/neko-micro-blog-backend/consts"
+	"github.com/Kirisakiii/neko-micro-blog-backend/models"
 	"github.com/Kirisakiii/neko-micro-blog-backend/stores"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/encryptor"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/generator"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/valider"
-	"gorm.io/gorm"
 )
 
 // UserService 用户服务
@@ -24,6 +26,38 @@ func (factory *Factory) NewUserService() *UserService {
 	return &UserService{
 		userStore: factory.storeFactory.NewUserStore(),
 	}
+}
+
+// GetUserInfoByUsername 根据用户名获取用户信息。
+// w
+// 参数：
+//   - username：用户名
+//
+// 返回值：
+//   - *models.UserInfo：用户信息模型。
+func (service *UserService) GetUserInfoByUID(uid uint64) (*models.UserInfo, error) {
+	user, err := service.userStore.GetUserByUID(uid)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+// GetUserInfoByUsername 根据用户名获取用户信息。
+//
+// 参数：
+//   - username：用户名
+//
+// 返回值：
+//   - *models.UserInfo：用户信息模型。
+func (service *UserService) GetUserInfoByUsername(username string) (*models.UserInfo, error) {
+	user, err := service.userStore.GetUserByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 // RegisterUser 注册用户。

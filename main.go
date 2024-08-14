@@ -100,9 +100,8 @@ func main() {
 
 	// User 路由
 	userController := controllerFactory.NewUserController()
-	// app.Get("/user/profile")
-	// 用户注册
-	app.Post("/user/register", userController.NewRegisterHandler())
+	app.Get("/api/user/profile", userController.NewProfileHandler())    // 查询用户信息
+	app.Post("/api/user/register", userController.NewRegisterHandler()) // 用户注册
 
 	app.Listen(fmt.Sprintf(":%d", cfg.Server.Port))
 }
