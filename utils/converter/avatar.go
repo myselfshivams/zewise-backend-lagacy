@@ -56,7 +56,10 @@ func ResizeAvatar(fileType types.AvatarFileType, file *multipart.File, size int)
 	}
 
 	// 重置文件指针
-	(*file).Seek(0, 0)
+	_, err = (*file).Seek(0, 0)
+	if err != nil {
+		return nil, err
+	}
 
 	return imgData, nil
 }

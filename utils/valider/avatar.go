@@ -56,7 +56,11 @@ func ValidAvatarFile(fileHeader *multipart.FileHeader, file *multipart.File) (ty
 		return fileType, errors.New("avatar size too small")
 	}
 
-	(*file).Seek(0, 0)
+	// 重置文件指针
+	_, err = (*file).Seek(0, 0)
+	if err != nil {
+		return fileType, err
+	}
 
 	return fileType, nil
 }
