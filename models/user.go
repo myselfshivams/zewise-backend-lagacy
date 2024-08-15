@@ -46,8 +46,8 @@ type UserLoginLog struct {
 	BearerToken string    `gorm:"column:bearer_token"`                // 此次登录获取到的令牌
 }
 
-// UserBannedToken 用户 Token 黑名单模型
-type UserBannedToken struct {
+// UserAvaliableToken 用户可用Token模型
+type UserAvaliableToken struct {
 	gorm.Model           // 基本模型
 	UID        uint64    `gorm:"column:uid"`          // 用户ID
 	Username   string    `gorm:"column:username"`     // 用户名

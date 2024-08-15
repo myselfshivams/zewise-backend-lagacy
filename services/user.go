@@ -146,10 +146,34 @@ func (service *UserService) LoginUser(username string, password string, ip strin
 		return "", errors.New("password error")
 	}
 
+	// 检查令牌是否达到上限
+	avaliableTokens, err := service.userStore.GetUserAvaliableTokens(userAuthInfo.UserName)
+	if err != nil {
+		return "", err
+	}
+	if len(avaliableTokens) >= consts.MAX_TOKENS_PER_USER {
+		// 清除最早的令牌
+		err = service.userStore.BanToken(avaliableTokens[0].Token)
+		if err != nil {
+			return "", err
+		}
+	}
+
 	// 生成令牌
-	token, err := generator.GenerateToken(userAuthInfo.UID, username)
+	token, claims, err := generator.GenerateToken(userAuthInfo.UID, username)
 	if err != nil {
 		userLoginLog.Reason = "token generation error"
+		inner_err := service.userStore.CreateUserLoginLog(userLoginLog)
+		if inner_err != nil {
+			return "", errors.Join(err, inner_err)
+		}
+		return "", err
+	}
+
+	// 创建可用令牌
+	err = service.userStore.CreateAvaliableToken(token, claims)
+	if err != nil {
+		userLoginLog.Reason = "token creation error"
 		inner_err := service.userStore.CreateUserLoginLog(userLoginLog)
 		if inner_err != nil {
 			return "", errors.Join(err, inner_err)
