@@ -16,6 +16,7 @@ import (
 	"github.com/Kirisakiii/neko-micro-blog-backend/config"
 	"github.com/Kirisakiii/neko-micro-blog-backend/controllers"
 	"github.com/Kirisakiii/neko-micro-blog-backend/loggers"
+	"github.com/Kirisakiii/neko-micro-blog-backend/middleware"
 	"github.com/Kirisakiii/neko-micro-blog-backend/models"
 	"github.com/Kirisakiii/neko-micro-blog-backend/services"
 	"github.com/Kirisakiii/neko-micro-blog-backend/stores"
@@ -25,7 +26,9 @@ var (
 	logger            *logrus.Logger
 	cfg               *config.Config
 	db                *gorm.DB
+	storeFactory      *stores.Factory
 	controllerFactory *controllers.Factory
+	middlewareFactory *middleware.Factory
 )
 
 func init() {
@@ -89,12 +92,16 @@ func init() {
 		logger.Panicln("迁移数据库模型失败：", err.Error())
 	}
 
+	// 建立数据访问层工厂
+	storeFactory = stores.NewFactory(db)
+
 	// 建立控制器层工厂
 	controllerFactory = controllers.NewFactory(
-		services.NewFactory(
-			stores.NewFactory(db),
-		),
+		services.NewFactory(storeFactory),
 	)
+
+	// 建立中间件工厂
+	middlewareFactory = middleware.NewFactory(storeFactory)
 }
 
 func main() {
@@ -105,6 +112,9 @@ func main() {
 	app.Use(compress.New(compress.Config{
 		Level: cfg.Compress.Level,
 	}))
+
+	// Auth 中间件
+	authMiddleware := middlewareFactory.NewAuthMiddleware()
 
 	// 静态资源路由
 	resource := app.Group("/resources")
@@ -119,9 +129,10 @@ func main() {
 	// User 路由
 	userController := controllerFactory.NewUserController()
 	user := api.Group("/user")
-	user.Get("/profile", userController.NewProfileHandler())    // 查询用户信息
-	user.Post("/register", userController.NewRegisterHandler()) // 用户注册
-	user.Post("/login", userController.NewLoginHandler())       // 用户登录
+	user.Get("/profile", userController.NewProfileHandler())                                            // 查询用户信息
+	user.Post("/register", userController.NewRegisterHandler())                                         // 用户注册
+	user.Post("/login", userController.NewLoginHandler())                                               // 用户登录
+	user.Post("/upload-avatar", authMiddleware.NewTokenAuth(), userController.NewUploadAvatarHandler()) // 上传头像
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)))
 }
