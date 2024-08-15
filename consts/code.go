@@ -14,4 +14,7 @@ const (
 
 	// AUTH_ERROR 认证错误
 	AUTH_ERROR serializers.ResponseCode = 3
+
+	// NETWORK_ERROR 网络错误
+	NETWORK_ERROR serializers.ResponseCode = 4
 )

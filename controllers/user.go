@@ -158,7 +158,33 @@ func (controller *UserController) NewLoginHandler() fiber.Handler {
 //   - fiber.Handler：新的上传头像的处理函数。
 func (controller *UserController) NewUploadAvatarHandler() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		// TODO: 上传头像
-		return ctx.SendString("")
+		// 获取Token Claims
+		claims := ctx.Locals("claims").(*types.BearerTokenClaims)
+
+		// 获取文件
+		// 检查表单中文件的数量
+		form, err := ctx.MultipartForm()
+		if err != nil {
+			return err
+		}
+		files := form.File["avatar"]
+		if len(files) != 1 {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(consts.PARAMETER_ERROR, "required 1 file, but got more or less"),
+			)
+		}
+		fileHeader := files[0]
+
+		// 保存头像
+		err = controller.userService.UserUploadAvatar(claims.UID, fileHeader)
+		if err != nil {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(consts.SERVER_ERROR, err.Error()),
+			)
+		}
+
+		return ctx.Status(200).JSON(
+			serializers.NewResponse(consts.SUCCESS, "succeed"),
+		)
 	}
 }
