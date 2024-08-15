@@ -195,7 +195,6 @@ func (service *UserService) UserUploadAvatar(uid uint64, fileHeader *multipart.F
 	if err != nil {
 		return err
 	}
-	file.Seek(0, 0)
 
 	// 保存头像
 	var sb strings.Builder
