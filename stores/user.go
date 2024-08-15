@@ -1,6 +1,8 @@
 package stores
 
 import (
+	"errors"
+
 	"gorm.io/gorm"
 
 	"github.com/Kirisakiii/neko-micro-blog-backend/models"
@@ -142,4 +144,25 @@ func (store *UserStore) BanToken(token string, claims *types.BearerTokenClaims) 
 	}
 
 	return nil
+}
+
+// IsTokenBanned 检查 Token 是否在黑名单中。
+//
+// 参数：
+//   - token：Token
+//
+// 返回值：
+//   - bool：如果 Token 在黑名单中，则返回true，否则返回false。
+//   - error：如果在查询过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) IsTokenBanned(token string) (bool, error) {
+	userBannedToken := new(models.UserBannedToken)
+	result := store.db.Where("token = ?", token).First(userBannedToken)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false, nil
+	}
+	if result.Error != nil {
+		return false, result.Error
+	}
+
+	return true, nil
 }

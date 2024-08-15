@@ -9,6 +9,7 @@ import (
 	"github.com/mssola/useragent"
 	"gorm.io/gorm"
 
+	"github.com/Kirisakiii/neko-micro-blog-backend/consts"
 	"github.com/Kirisakiii/neko-micro-blog-backend/models"
 	"github.com/Kirisakiii/neko-micro-blog-backend/services"
 	"github.com/Kirisakiii/neko-micro-blog-backend/types"
@@ -41,7 +42,7 @@ func (controller *UserController) NewProfileHandler() fiber.Handler {
 		username := ctx.Query("username")
 		if uidStr == "" && username == "" {
 			return ctx.Status(200).JSON(
-				serializers.NewResponse(1, "parameter uid or username is required"),
+				serializers.NewResponse(consts.PARAMETER_ERROR, "parameter uid or username is required"),
 			)
 		}
 
@@ -55,7 +56,7 @@ func (controller *UserController) NewProfileHandler() fiber.Handler {
 			uid, err = strconv.ParseUint(uidStr, 10, 64)
 			if err != nil {
 				return ctx.Status(200).JSON(
-					serializers.NewResponse(1, err.Error()),
+					serializers.NewResponse(consts.SERVER_ERROR, err.Error()),
 				)
 			}
 			user, err = controller.userService.GetUserInfoByUID(uid)
@@ -65,17 +66,17 @@ func (controller *UserController) NewProfileHandler() fiber.Handler {
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ctx.Status(200).JSON(
-					serializers.NewResponse(2, "user does not exist"),
+					serializers.NewResponse(consts.PARAMETER_ERROR, "user does not exist"),
 				)
 			}
 			return ctx.Status(200).JSON(
-				serializers.NewResponse(2, err.Error()),
+				serializers.NewResponse(consts.SERVER_ERROR, err.Error()),
 			)
 		}
 
 		// 返回结果
 		return ctx.Status(200).JSON(
-			serializers.NewResponse(0, "", serializers.NewUserProfileData(user)),
+			serializers.NewResponse(consts.SUCCESS, "", serializers.NewUserProfileData(user)),
 		)
 	}
 }
@@ -91,7 +92,7 @@ func (controller *UserController) NewRegisterHandler() fiber.Handler {
 		err := ctx.BodyParser(reqBody)
 		if err != nil {
 			return ctx.Status(200).JSON(
-				serializers.NewResponse(1, err.Error()),
+				serializers.NewResponse(consts.PARAMETER_ERROR, err.Error()),
 			)
 		}
 
@@ -99,13 +100,13 @@ func (controller *UserController) NewRegisterHandler() fiber.Handler {
 		err = controller.userService.RegisterUser(reqBody.Username, reqBody.Password)
 		if err != nil {
 			return ctx.Status(200).JSON(
-				serializers.NewResponse(2, err.Error()),
+				serializers.NewResponse(consts.SERVER_ERROR, err.Error()),
 			)
 		}
 
 		// 返回结果
 		return ctx.Status(200).JSON(
-			serializers.NewResponse(0, "succeed"),
+			serializers.NewResponse(consts.SUCCESS, "succeed"),
 		)
 	}
 }
@@ -121,7 +122,7 @@ func (controller *UserController) NewLoginHandler() fiber.Handler {
 		err := ctx.BodyParser(reqBody)
 		if err != nil {
 			return ctx.Status(200).JSON(
-				serializers.NewResponse(1, err.Error()),
+				serializers.NewResponse(consts.PARAMETER_ERROR, err.Error()),
 			)
 		}
 
@@ -140,13 +141,24 @@ func (controller *UserController) NewLoginHandler() fiber.Handler {
 		token, err := controller.userService.LoginUser(reqBody.Username, reqBody.Password, ctx.IP(), browserInfo, os)
 		if err != nil {
 			return ctx.Status(200).JSON(
-				serializers.NewResponse(2, err.Error()),
+				serializers.NewResponse(consts.PARAMETER_ERROR, err.Error()),
 			)
 		}
 
 		// 返回结果
 		return ctx.Status(200).JSON(
-			serializers.NewResponse(0, "succeed", serializers.NewUserToken(token)),
+			serializers.NewResponse(consts.SUCCESS, "succeed", serializers.NewUserToken(token)),
 		)
+	}
+}
+
+// NewUploadAvatarHandler 返回上传头像的处理函数。
+//
+// 返回值：
+//   - fiber.Handler：新的上传头像的处理函数。
+func (controller *UserController) NewUploadAvatarHandler() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		// TODO: 上传头像
+		return ctx.SendString("")
 	}
 }
