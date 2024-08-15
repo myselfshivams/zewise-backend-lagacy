@@ -24,7 +24,7 @@ import (
 // 返回值：
 //   - string：新的令牌。
 //   - error：如果在生成过程中发生错误，则返回相应的错误信息，否则返回nil。
-func GenerateToken(uid uint64, username string) (string, *types.BearerTokenClaims, error) {
+func GenerateToken(uid uint64, username string) (string, error) {
 	claims := &types.BearerTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(consts.TOKEN_EXPIRE_DURATION * time.Second)),
@@ -39,6 +39,5 @@ func GenerateToken(uid uint64, username string) (string, *types.BearerTokenClaim
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(consts.TOKEN_SECRET))
-	return tokenString, claims, err
+	return token.SignedString([]byte(consts.TOKEN_SECRET))
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/Kirisakiii/neko-micro-blog-backend/consts"
 	"github.com/Kirisakiii/neko-micro-blog-backend/models"
 	"github.com/Kirisakiii/neko-micro-blog-backend/stores"
+	"github.com/Kirisakiii/neko-micro-blog-backend/types"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/converter"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/encryptor"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/generator"
@@ -146,34 +147,10 @@ func (service *UserService) LoginUser(username string, password string, ip strin
 		return "", errors.New("password error")
 	}
 
-	// 检查令牌是否达到上限
-	avaliableTokens, err := service.userStore.GetUserAvaliableTokens(userAuthInfo.UserName)
-	if err != nil {
-		return "", err
-	}
-	if len(avaliableTokens) >= consts.MAX_TOKENS_PER_USER {
-		// 清除最早的令牌
-		err = service.userStore.BanToken(avaliableTokens[0].Token)
-		if err != nil {
-			return "", err
-		}
-	}
-
 	// 生成令牌
-	token, claims, err := generator.GenerateToken(userAuthInfo.UID, username)
+	token, err := generator.GenerateToken(userAuthInfo.UID, username)
 	if err != nil {
 		userLoginLog.Reason = "token generation error"
-		inner_err := service.userStore.CreateUserLoginLog(userLoginLog)
-		if inner_err != nil {
-			return "", errors.Join(err, inner_err)
-		}
-		return "", err
-	}
-
-	// 创建可用令牌
-	err = service.userStore.CreateAvaliableToken(token, claims)
-	if err != nil {
-		userLoginLog.Reason = "token creation error"
 		inner_err := service.userStore.CreateUserLoginLog(userLoginLog)
 		if inner_err != nil {
 			return "", errors.Join(err, inner_err)
@@ -225,4 +202,70 @@ func (service *UserService) UserUploadAvatar(uid uint64, fileHeader *multipart.F
 	sb.WriteString(strconv.FormatUint(uid, 10))
 	sb.WriteString(".webp")
 	return service.userStore.SaveAvatar(uid, sb.String(), resizedAvatar)
+}
+
+//	UserUpdatePassword 修改密码
+//
+//	参数：
+//	- username: 用户名
+//	- password: 密码
+//	- newPassword: 新的密码
+//
+// 返回值：
+//   - error：如果在上传过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (service *UserService) UserUpdatePassword(username string, password string, newPassword string) error {
+	// 获取用户认证信息
+	userAuthInfo, err := service.userStore.GetUserAuthInfo(username)
+	if err != nil {
+		return err
+	}
+
+	// 验证用户密码
+	err = encryptor.CompareHashPassword(userAuthInfo.PasswordHash, password, userAuthInfo.Salt)
+	if err != nil {
+		// 密码验证失败，返回错误
+		return errors.New("incorrect password")
+	}
+
+	// 取新密码哈希
+	hashedNewPassword, err := encryptor.HashPassword(newPassword, userAuthInfo.Salt)
+	if err != nil {
+		return err
+	}
+
+	//更新密码
+	err = service.userStore.UpdatePassword(userAuthInfo.UserName, hashedNewPassword)
+    if err!= nil {
+        return err
+    }
+
+	return nil
+}
+
+
+func (service *UserService) UpdateUserInfo(uid uint64, reqBody *types.UserUpdateProfile) error {
+	// 构造更新Profile结构体
+	updatedProfile := &models.UserInfo{}
+	if reqBody.NickName != nil {
+		updatedProfile.NickName = reqBody.NickName
+	}
+	if reqBody.Birth != nil {
+		birth := time.Unix(int64(*reqBody.Birth), 0)
+		updatedProfile.Birth = &birth
+	}
+	if reqBody.Gender != nil {
+		if *reqBody.Gender != "male" && *reqBody.Gender != "female" {
+			updatedProfile.Gender = reqBody.Gender
+		} else {
+			updatedProfile.Gender = reqBody.Gender
+		}
+    }
+
+    // 在这里执行实际的数据库更新操作
+    err := service.userStore.UpdateUserInfo(uid, updatedProfile)
+    if err != nil {
+        return err
+    }
+
+    return nil
 }

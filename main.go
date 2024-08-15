@@ -133,6 +133,8 @@ func main() {
 	user.Post("/register", userController.NewRegisterHandler())                                         // 用户注册
 	user.Post("/login", userController.NewLoginHandler())                                               // 用户登录
 	user.Post("/upload-avatar", authMiddleware.NewTokenAuth(), userController.NewUploadAvatarHandler()) // 上传头像
+	user.Post("/update-psw", userController.NewUserUpdatePasswordHandler())                             // 修改密码
+	user.Post("/edit", authMiddleware.NewTokenAuth(), userController.NewUserUpdateProfileHandler())     // 修改用户资料
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)))
 }

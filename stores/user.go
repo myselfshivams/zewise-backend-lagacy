@@ -126,23 +126,23 @@ func (store *UserStore) CreateUserLoginLog(userLoginLogInfo *models.UserLoginLog
 	return nil
 }
 
-// CreateAvaliableToken 创建一个可用的 Token。
+// BanToken 将用户 Token 加入黑名单。
 //
 // 参数：
 //   - token：Token
-//   - claims：Token 的声明
+//   - claims：Token 中的声明
 //
 // 返回值：
-//   - error：如果在创建过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) CreateAvaliableToken(token string, claims *types.BearerTokenClaims) error {
-	userAvaliableToken := &models.UserAvaliableToken{
+//   - error：如果在插入过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) BanToken(token string, claims *types.BearerTokenClaims) error {
+	userBannedToken := &models.UserBannedToken{
 		UID:        claims.UID,
 		Username:   claims.Username,
 		Token:      token,
 		ExpireTime: claims.ExpiresAt.Time,
 	}
 
-	result := store.db.Create(userAvaliableToken)
+	result := store.db.Create(userBannedToken)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -150,64 +150,25 @@ func (store *UserStore) CreateAvaliableToken(token string, claims *types.BearerT
 	return nil
 }
 
-// BanToken 将 Token 禁用。
+// IsTokenBanned 检查 Token 是否在黑名单中。
 //
 // 参数：
 //   - token：Token
 //
 // 返回值：
-//   - error：如果在禁用过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) BanToken(token string) error {
-	// 使用硬删除
-	result := store.db.Where("token = ?", token).Unscoped().Delete(&models.UserAvaliableToken{})
-	if result.Error != nil {
-		return result.Error
-	}
-
-	return nil
-}
-
-// IsTokenAvaliable 检查 Token 是否可用。
-//
-// 参数：
-//   - token：Token
-//
-// 返回值：
-//   - bool：如果 Token 可用，则返回 true，否则返回 false。
-//   - error：如果在检查过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) IsTokenAvaliable(token string) (bool, error) {
-	userAvaliableToken := new(models.UserAvaliableToken)
-	result := store.db.Where("token = ?", token).First(userAvaliableToken)
-
-	// 如果记录不存在，则返回 false
+//   - bool：如果 Token 在黑名单中，则返回true，否则返回false。
+//   - error：如果在查询过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) IsTokenBanned(token string) (bool, error) {
+	userBannedToken := new(models.UserBannedToken)
+	result := store.db.Where("token = ?", token).First(userBannedToken)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return false, nil
 	}
-
-	// 如果发生其他错误，则返回错误信息
 	if result.Error != nil {
 		return false, result.Error
 	}
 
 	return true, nil
-}
-
-// GetUserAvaliableTokens 获取用户可用的 Token。
-//	
-// 参数：
-//   - username：用户名
-//
-// 返回值：
-//   - []models.UserAvaliableToken：用户可用的 Token。
-//   - error：如果在获取过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) GetUserAvaliableTokens(username string) ([]models.UserAvaliableToken, error) {
-	tokens := make([]models.UserAvaliableToken, 0)
-	// 按创建时间排序
-	result := store.db.Where("username = ?", username).Order("created_at asc").Find(&tokens)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-	return tokens, nil
 }
 
 // SaveAvatar 保存用户头像。
@@ -249,4 +210,41 @@ func (store *UserStore) SaveAvatar(uid uint64, fileName string, data []byte) err
 	}
 
 	return nil
+}
+
+// UpdatePassword 更新用户密码。
+//
+// 参数：
+//   - username：用户名
+//   - hashedNewPassword：经过哈希处理的新密码
+//
+// 返回值：
+//   - error：如果在更新过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) UpdatePassword(username string, hashedNewPassword string) error {
+	userAuthInfo := new(models.UserAuthInfo)
+    result := store.db.Where("username = ?", username).First(userAuthInfo)
+    if result.Error!= nil {
+        return result.Error
+    }
+
+    userAuthInfo.PasswordHash = hashedNewPassword
+    result = store.db.Save(userAuthInfo)
+    if result.Error!= nil {
+        return result.Error
+    }
+
+    return nil
+}
+
+// UpdateUserInfo 更新用户信息。
+//
+// 参数：
+//   - uid：用户ID
+//   - updatedProfile：更新后的用户信息
+//
+// 返回值：
+//   - error：如果在更新过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) UpdateUserInfo(uid uint64, updatedProfile *models.UserInfo) error {
+	result := store.db.Model(updatedProfile).Where("id = ?", uid).Updates(updatedProfile)
+    return result.Error
 }

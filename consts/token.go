@@ -8,6 +8,3 @@ const TOKEN_SECRET = "NEKO_MICRO_BLOG_BACKEND_EXAMPLE_SECRET"
 
 // TOKEN_ISSUER 令牌签发者
 const TOKEN_ISSUER = "org.kirisakiii.neko"
-
-// MAX_TOKEN 最大令牌数量
-const MAX_TOKENS_PER_USER = 5
