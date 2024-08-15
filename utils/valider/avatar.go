@@ -4,7 +4,6 @@ import (
 	"errors"
 	"image"
 	"image/jpeg"
-	"image/png"
 	"mime/multipart"
 
 	"golang.org/x/image/webp"
@@ -41,7 +40,7 @@ func ValidAvatarFile(fileHeader *multipart.FileHeader, file *multipart.File) (ty
 		imgConfig, err = jpeg.DecodeConfig(*file)
 	case "image/png":
 		fileType = types.AVATAR_FILE_TYPE_PNG
-		imgConfig, err = png.DecodeConfig(*file)
+		imgConfig, _, err = image.DecodeConfig(*file)
 	case "image/webp":
 		fileType = types.AVATAR_FILE_TYPE_WEBP
 		imgConfig, err = webp.DecodeConfig(*file)

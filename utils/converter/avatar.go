@@ -7,8 +7,7 @@ import (
 	"mime/multipart"
 
 	"github.com/KononK/resize"
-	webpEncoder "github.com/chai2010/webp"
-	"golang.org/x/image/webp"
+	"github.com/chai2010/webp"
 
 	"github.com/Kirisakiii/neko-micro-blog-backend/consts"
 	"github.com/Kirisakiii/neko-micro-blog-backend/types"
@@ -51,7 +50,7 @@ func ResizeAvatar(fileType types.AvatarFileType, file *multipart.File, size int)
 	)
 
 	// 编码图片 编码为webp存储
-	imgData, err := webpEncoder.EncodeRGBA(resizedImg, consts.QUALITY)
+	imgData, err := webp.EncodeRGBA(resizedImg, consts.QUALITY)
 	if err != nil {
 		return nil, err
 	}

@@ -15,7 +15,7 @@ func Migrate(db *gorm.DB) error {
 	if err = db.AutoMigrate(&UserLoginLog{}); err != nil {
 		return err
 	}
-	if err = db.AutoMigrate(&UserAvaliableToken{}); err != nil {
+	if err = db.AutoMigrate(&UserBannedToken{}); err != nil {
 		return err
 	}
 
