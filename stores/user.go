@@ -1,7 +1,11 @@
 package stores
 
 import (
+	"bytes"
 	"errors"
+	"io"
+	"os"
+	"path/filepath"
 
 	"gorm.io/gorm"
 
@@ -165,4 +169,45 @@ func (store *UserStore) IsTokenBanned(token string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// SaveAvatar 保存用户头像。
+//
+// 参数：
+//   - fileName：文件名
+//   - data：文件数据
+//
+// 返回值：
+//   - error：如果在保存过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) SaveAvatar(uid uint64, fileName string, data []byte) error {
+	savePath := filepath.Join("./public/avatars", fileName)
+
+	// 创建目标文件
+	file, err := os.Create(savePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// 使用 io.Copy 将数据写入文件
+	_, err = io.Copy(file, bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+
+	// 获取头像文件名
+	user := new(models.UserInfo)
+	result := store.db.Where("id = ?", uid).First(user)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// 更新头像文件名
+	user.Avatar = fileName
+	result = store.db.Save(user)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }

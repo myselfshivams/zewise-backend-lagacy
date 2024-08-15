@@ -2,6 +2,9 @@ package services
 
 import (
 	"errors"
+	"mime/multipart"
+	"strconv"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -9,6 +12,7 @@ import (
 	"github.com/Kirisakiii/neko-micro-blog-backend/consts"
 	"github.com/Kirisakiii/neko-micro-blog-backend/models"
 	"github.com/Kirisakiii/neko-micro-blog-backend/stores"
+	"github.com/Kirisakiii/neko-micro-blog-backend/utils/converter"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/encryptor"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/generator"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/valider"
@@ -162,4 +166,40 @@ func (service *UserService) LoginUser(username string, password string, ip strin
 	}
 
 	return token, nil
+}
+
+// UserUploadAvatar 用户上传头像。
+//
+// 参数：
+//   - uid：用户ID
+//   - file：头像文件
+//
+// 返回值：
+//   - error：如果在上传过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (service *UserService) UserUploadAvatar(uid uint64, fileHeader *multipart.FileHeader) error {
+	// 打开文件
+	file, err := fileHeader.Open()
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// 校验头像
+	fileType, err := valider.ValidAvatarFile(fileHeader, &file)
+	if err != nil {
+		return err
+	}
+
+	// 缩放头像
+	resizedAvatar, err := converter.ResizeAvatar(fileType, &file, consts.STANDERED_AVATAR_SIZE)
+	if err != nil {
+		return err
+	}
+	file.Seek(0, 0)
+
+	// 保存头像
+	var sb strings.Builder
+	sb.WriteString(strconv.FormatUint(uid, 10))
+	sb.WriteString(".webp")
+	return service.userStore.SaveAvatar(uid, sb.String(), resizedAvatar)
 }

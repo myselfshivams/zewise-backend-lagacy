@@ -3,11 +3,15 @@ module github.com/Kirisakiii/neko-micro-blog-backend
 go 1.21.6
 
 require (
+	github.com/KononK/resize v0.0.0-20200801203131-21c514740ed6
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/mssola/useragent v1.0.0
 	github.com/pelletier/go-toml/v2 v2.1.1
 	github.com/sirupsen/logrus v1.9.3
+	golang.org/x/image v0.15.0
 )
+
+require github.com/chai2010/webp v1.1.1
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
