@@ -1,16 +1,18 @@
 package serializers
 
+type ResponseCode uint64
+
 // BasicResponse 基本响应结构。
 type BasicResponse struct {
-	Code    uint64 `json:"code"`
-	Message string `json:"message"`
+	Code    ResponseCode `json:"code"`
+	Message string       `json:"message"`
 }
 
 // DataResponse 带数据的响应结构。
 type DataResponse struct {
-	Code    uint64      `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	Code    ResponseCode `json:"code"`
+	Message string       `json:"message"`
+	Data    interface{}  `json:"data"`
 }
 
 // NewResponse 创建一个新的响应。
@@ -22,7 +24,7 @@ type DataResponse struct {
 //
 // 返回值：
 //   - interface{}：新的响应结构体。
-func NewResponse(code uint64, message string, data ...interface{}) interface{} {
+func NewResponse(code ResponseCode, message string, data ...interface{}) interface{} {
 	if len(data) == 0 {
 		return BasicResponse{
 			Code:    code,
