@@ -146,5 +146,5 @@ func main() {
 	user.Post("/update-psw", userController.NewUpdatePasswordHandler())                                  // 修改密码
 	user.Post("/edit", authMiddleware.NewMiddleware(), userController.NewUpdateProfileHandler())         // 修改用户资料
 
-	log.Fatal(app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)))
+	log.Fatal(app.Listen(fmt.Sprintf("%s:%d", cfg.Database.Host, cfg.Server.Port)))
 }
