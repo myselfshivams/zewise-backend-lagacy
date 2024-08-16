@@ -61,16 +61,16 @@ func (middleware *AuthMiddleware) NewTokenAuth() fiber.Handler {
 			)
 		}
 
-		// 检验 Token 是否在黑名单中
-		isBanned, err := middleware.userStore.IsTokenBanned(token)
+		// 检验 Token 是否可用
+		isAvaliable, err := middleware.userStore.IsTokenAvaliable(token)
 		if err != nil {
 			return ctx.Status(200).JSON(
 				serializers.NewResponse(consts.SERVER_ERROR, err.Error()),
 			)
 		}
-		if isBanned {
+		if !isAvaliable {
 			return ctx.Status(200).JSON(
-				serializers.NewResponse(consts.AUTH_ERROR, "bearer token is banned"),
+				serializers.NewResponse(consts.AUTH_ERROR, "bearer token is not avaliable"),
 			)
 		}
 
