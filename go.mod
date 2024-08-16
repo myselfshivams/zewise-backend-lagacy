@@ -11,7 +11,10 @@ require (
 	golang.org/x/image v0.15.0
 )
 
-require github.com/chai2010/webp v1.1.1
+require (
+	github.com/chai2010/webp v1.1.1
+	github.com/lib/pq v1.10.9
+)
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
