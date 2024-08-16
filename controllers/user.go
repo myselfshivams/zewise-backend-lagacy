@@ -111,6 +111,13 @@ func (controller *UserController) NewRegisterHandler() fiber.Handler {
 			)
 		}
 
+		// 校验参数
+		if reqBody.Username == "" || reqBody.Password == "" {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(consts.PARAMETER_ERROR, "username or password is required"),
+			)
+		}
+
 		// 注册用户
 		err = controller.userService.RegisterUser(reqBody.Username, reqBody.Password)
 		if err != nil {
@@ -138,6 +145,13 @@ func (controller *UserController) NewLoginHandler() fiber.Handler {
 		if err != nil {
 			return ctx.Status(200).JSON(
 				serializers.NewResponse(consts.PARAMETER_ERROR, err.Error()),
+			)
+		}
+
+		// 校验参数
+		if reqBody.Username == "" || reqBody.Password == "" {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(consts.PARAMETER_ERROR, "username or password is required"),
 			)
 		}
 
@@ -214,19 +228,26 @@ func (controller *UserController) NewUploadAvatarHandler() fiber.Handler {
 func (controller *UserController) NewUpdatePasswordHandler() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		// 解析请求体
-		userUpdatePassword := new(types.UserUpdatePasswordBody)
-		err := ctx.BodyParser(userUpdatePassword)
+		reqBody := new(types.UserUpdatePasswordBody)
+		err := ctx.BodyParser(reqBody)
 		if err != nil {
 			return ctx.Status(200).JSON(
 				serializers.NewResponse(consts.PARAMETER_ERROR, err.Error()),
 			)
 		}
 
+		// 校验参数
+		if reqBody.Username == "" || reqBody.Password == "" || reqBody.NewPassword == ""{
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(consts.PARAMETER_ERROR, "username, password or new password is required"),
+			)
+		}
+
 		// 修改密码
 		err = controller.userService.UserUpdatePassword(
-			userUpdatePassword.Username,
-			userUpdatePassword.Password,
-			userUpdatePassword.NewPassword,
+			reqBody.Username,
+			reqBody.Password,
+			reqBody.NewPassword,
 		)
 		if err != nil {
 			return ctx.Status(200).JSON(
@@ -256,6 +277,13 @@ func (controller *UserController) NewUpdateProfileHandler() fiber.Handler {
 			)
 		}
 
+		// 校验参数
+		if reqBody.NickName == nil && reqBody.Birth == nil && reqBody.Gender == nil {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(consts.PARAMETER_ERROR, "at least one of nickname, birth or gender is required"),
+			)
+		}
+
 		// 获取Token Claims
 		claims := ctx.Locals("claims").(*types.BearerTokenClaims)
 
@@ -263,13 +291,13 @@ func (controller *UserController) NewUpdateProfileHandler() fiber.Handler {
 		err = controller.userService.UpdateUserInfo(claims.UID, reqBody)
 		if err != nil {
 			return ctx.Status(500).JSON(
-				serializers.NewResponse(consts.SERVER_ERROR, "Failed to update profile"),
+				serializers.NewResponse(consts.SERVER_ERROR, "failed to update profile"),
 			)
 		}
 
 		// 返回成功的 JSON 响应
 		return ctx.Status(200).JSON(
-			serializers.NewResponse(consts.SUCCESS, "Profile updated successfully"),
+			serializers.NewResponse(consts.SUCCESS, "profile updated successfully"),
 		)
 	}
 }
