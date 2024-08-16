@@ -88,7 +88,7 @@ func (controller *UserController) NewProfileHandler() fiber.Handler {
 func (controller *UserController) NewRegisterHandler() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		// 解析请求体
-		reqBody := new(types.AuthBody)
+		reqBody := new(types.UserAuthBody)
 		err := ctx.BodyParser(reqBody)
 		if err != nil {
 			return ctx.Status(200).JSON(
@@ -118,7 +118,7 @@ func (controller *UserController) NewRegisterHandler() fiber.Handler {
 func (controller *UserController) NewLoginHandler() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		// 解析请求体
-		reqBody := new(types.AuthBody)
+		reqBody := new(types.UserAuthBody)
 		err := ctx.BodyParser(reqBody)
 		if err != nil {
 			return ctx.Status(200).JSON(
@@ -185,6 +185,69 @@ func (controller *UserController) NewUploadAvatarHandler() fiber.Handler {
 
 		return ctx.Status(200).JSON(
 			serializers.NewResponse(consts.SUCCESS, "succeed"),
+		)
+	}
+}
+
+//	NewUserUpdatePassword 修改密码的函数
+//
+// 返回值：
+//   - fiber.Handler：新的上传头像的处理函数。
+func (controller *UserController) NewUserUpdatePasswordHandler() fiber.Handler {
+	type UserUpdatePassword struct {
+		types.UserAuthBody
+		NewPassword string `json:"new_password"`
+	}
+
+	return func(ctx *fiber.Ctx) error {
+		// 解析请求体
+		userUpdatePassword := new(UserUpdatePassword)
+		err := ctx.BodyParser(userUpdatePassword)
+		if err != nil {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(consts.PARAMETER_ERROR, err.Error()),
+			)
+		}
+
+		err = controller.userService.UserUpdatePassword(
+			userUpdatePassword.Username,
+			userUpdatePassword.Password,
+			userUpdatePassword.NewPassword,
+		)
+		if err != nil {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(consts.AUTH_ERROR, err.Error()),
+			)
+		}
+
+		// 返回成功的 JSON 响应
+		return ctx.Status(200).JSON(
+			serializers.NewResponse(consts.SUCCESS, "password updated successfully"),
+		)
+	}
+}
+
+func (controller *UserController) NewUserUpdateProfileHandler() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		reqBody := new(types.UserUpdateProfile)
+		err := ctx.BodyParser(reqBody)
+		if err != nil {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(consts.PARAMETER_ERROR, err.Error()),
+			)
+		}
+
+		claims := ctx.Locals("claims").(*types.BearerTokenClaims)
+
+		err = controller.userService.UpdateUserInfo(claims.UID, reqBody)
+		if err != nil {
+			return ctx.Status(500).JSON(
+				serializers.NewResponse(consts.SERVER_ERROR, "Failed to update profile"),
+			)
+		}
+
+		return ctx.Status(200).JSON(
+			serializers.NewResponse(consts.SUCCESS, "Profile updated successfully"),
 		)
 	}
 }

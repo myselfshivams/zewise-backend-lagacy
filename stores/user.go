@@ -211,3 +211,40 @@ func (store *UserStore) SaveAvatar(uid uint64, fileName string, data []byte) err
 
 	return nil
 }
+
+// UpdatePassword 更新用户密码。
+//
+// 参数：
+//   - username：用户名
+//   - hashedNewPassword：经过哈希处理的新密码
+//
+// 返回值：
+//   - error：如果在更新过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) UpdatePassword(username string, hashedNewPassword string) error {
+	userAuthInfo := new(models.UserAuthInfo)
+    result := store.db.Where("username = ?", username).First(userAuthInfo)
+    if result.Error!= nil {
+        return result.Error
+    }
+
+    userAuthInfo.PasswordHash = hashedNewPassword
+    result = store.db.Save(userAuthInfo)
+    if result.Error!= nil {
+        return result.Error
+    }
+
+    return nil
+}
+
+// UpdateUserInfo 更新用户信息。
+//
+// 参数：
+//   - uid：用户ID
+//   - updatedProfile：更新后的用户信息
+//
+// 返回值：
+//   - error：如果在更新过程中发生错误，则返回相应的错误信息，否则返回nil。
+func (store *UserStore) UpdateUserInfo(uid uint64, updatedProfile *models.UserInfo) error {
+	result := store.db.Model(updatedProfile).Where("id = ?", uid).Updates(updatedProfile)
+    return result.Error
+}
