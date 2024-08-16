@@ -1,5 +1,6 @@
 /*
 Package models - NekoBlog backend server database models
+This file is for user related models.
 Copyright (c) [2024], Author(s):
 - WhitePaper233<baizhiwp@gmail.com>
 */

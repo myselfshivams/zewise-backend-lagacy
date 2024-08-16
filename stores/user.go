@@ -1,3 +1,10 @@
+/*
+Package stores - NekoBlog backend server data access objects.
+This file is for user storage accessing.
+Copyright (c) [2024], Author(s):
+- WhitePaper233<baizhiwp@gmail.com>
+- sjyhlxysybzdhxd<2023122308@jou.edu.cn>
+*/
 package stores
 
 import (
@@ -26,7 +33,7 @@ func (factory *Factory) NewUserStore() *UserStore {
 	return &UserStore{factory.db}
 }
 
-// RegisterUser 注册用户将提供的用户名、盐和哈希密码注册到数据库中。
+// RegisterUserByUsername 注册用户将提供的用户名、盐和哈希密码注册到数据库中。
 //
 // 参数：
 //   - username：用户名
@@ -35,7 +42,7 @@ func (factory *Factory) NewUserStore() *UserStore {
 //
 // 返回值：
 //   - error：如果在注册过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) RegisterUser(username string, salt string, hashedPassword string) error {
+func (store *UserStore) RegisterUserByUsername(username string, salt string, hashedPassword string) error {
 	user := models.UserInfo{
 		UserName: username,
 		NickName: &username,
@@ -94,7 +101,7 @@ func (store *UserStore) GetUserByUsername(username string) (*models.UserInfo, er
 	return user, nil
 }
 
-// GetUserAuthInfo 通过用户名获取用户的认证信息。
+// GetUserAuthInfoByUsername 通过用户名获取用户的认证信息。
 //
 // 参数：
 //   - username：用户名
@@ -102,7 +109,7 @@ func (store *UserStore) GetUserByUsername(username string) (*models.UserInfo, er
 // 返回值：
 //   - *models.UserAuthInfo：如果找到了相应的用户认证信息，则返回该用户认证信息，否则返回nil。
 //   - error：如果在获取过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) GetUserAuthInfo(username string) (*models.UserAuthInfo, error) {
+func (store *UserStore) GetUserAuthInfoByUsername(username string) (*models.UserAuthInfo, error) {
 	userAuthInfo := new(models.UserAuthInfo)
 	result := store.db.Where("username = ?", username).First(userAuthInfo)
 	if result.Error != nil {
@@ -126,7 +133,7 @@ func (store *UserStore) CreateUserLoginLog(userLoginLogInfo *models.UserLoginLog
 	return nil
 }
 
-// CreateAvaliableToken 创建一个可用的 Token。
+// CreateUserAvaliableToken 创建一个可用的 Token。
 //
 // 参数：
 //   - token：Token
@@ -134,7 +141,7 @@ func (store *UserStore) CreateUserLoginLog(userLoginLogInfo *models.UserLoginLog
 //
 // 返回值：
 //   - error：如果在创建过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) CreateAvaliableToken(token string, claims *types.BearerTokenClaims) error {
+func (store *UserStore) CreateUserAvaliableToken(token string, claims *types.BearerTokenClaims) error {
 	userAvaliableToken := &models.UserAvaliableToken{
 		UID:        claims.UID,
 		Username:   claims.Username,
@@ -150,14 +157,14 @@ func (store *UserStore) CreateAvaliableToken(token string, claims *types.BearerT
 	return nil
 }
 
-// BanToken 将 Token 禁用。
+// BanUserToken 将 Token 禁用。
 //
 // 参数：
 //   - token：Token
 //
 // 返回值：
 //   - error：如果在禁用过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) BanToken(token string) error {
+func (store *UserStore) BanUserToken(token string) error {
 	// 使用硬删除
 	result := store.db.Where("token = ?", token).Unscoped().Delete(&models.UserAvaliableToken{})
 	if result.Error != nil {
@@ -167,7 +174,7 @@ func (store *UserStore) BanToken(token string) error {
 	return nil
 }
 
-// IsTokenAvaliable 检查 Token 是否可用。
+// IsUserTokenAvaliable 检查 Token 是否可用。
 //
 // 参数：
 //   - token：Token
@@ -175,7 +182,7 @@ func (store *UserStore) BanToken(token string) error {
 // 返回值：
 //   - bool：如果 Token 可用，则返回 true，否则返回 false。
 //   - error：如果在检查过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) IsTokenAvaliable(token string) (bool, error) {
+func (store *UserStore) IsUserTokenAvaliable(token string) (bool, error) {
 	userAvaliableToken := new(models.UserAvaliableToken)
 	result := store.db.Where("token = ?", token).First(userAvaliableToken)
 
@@ -192,15 +199,15 @@ func (store *UserStore) IsTokenAvaliable(token string) (bool, error) {
 	return true, nil
 }
 
-// GetUserAvaliableTokens 获取用户可用的 Token。
-//	
+// GetUserAvaliableTokensByUsername 获取用户可用的 Token。
+//
 // 参数：
 //   - username：用户名
 //
 // 返回值：
 //   - []models.UserAvaliableToken：用户可用的 Token。
 //   - error：如果在获取过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) GetUserAvaliableTokens(username string) ([]models.UserAvaliableToken, error) {
+func (store *UserStore) GetUserAvaliableTokensByUsername(username string) ([]models.UserAvaliableToken, error) {
 	tokens := make([]models.UserAvaliableToken, 0)
 	// 按创建时间排序
 	result := store.db.Where("username = ?", username).Order("created_at asc").Find(&tokens)
@@ -210,7 +217,7 @@ func (store *UserStore) GetUserAvaliableTokens(username string) ([]models.UserAv
 	return tokens, nil
 }
 
-// SaveAvatar 保存用户头像。
+// SaveUserAvatarByUID 保存用户头像。
 //
 // 参数：
 //   - fileName：文件名
@@ -218,7 +225,7 @@ func (store *UserStore) GetUserAvaliableTokens(username string) ([]models.UserAv
 //
 // 返回值：
 //   - error：如果在保存过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) SaveAvatar(uid uint64, fileName string, data []byte) error {
+func (store *UserStore) SaveUserAvatarByUID(uid uint64, fileName string, data []byte) error {
 	savePath := filepath.Join("./public/avatars", fileName)
 
 	// 创建目标文件
@@ -251,7 +258,7 @@ func (store *UserStore) SaveAvatar(uid uint64, fileName string, data []byte) err
 	return nil
 }
 
-// UpdatePassword 更新用户密码。
+// UpdateUserPasswordByUsername 更新用户密码。
 //
 // 参数：
 //   - username：用户名
@@ -259,23 +266,23 @@ func (store *UserStore) SaveAvatar(uid uint64, fileName string, data []byte) err
 //
 // 返回值：
 //   - error：如果在更新过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) UpdatePassword(username string, hashedNewPassword string) error {
+func (store *UserStore) UpdateUserPasswordByUsername(username string, hashedNewPassword string) error {
 	userAuthInfo := new(models.UserAuthInfo)
-    result := store.db.Where("username = ?", username).First(userAuthInfo)
-    if result.Error!= nil {
-        return result.Error
-    }
+	result := store.db.Where("username = ?", username).First(userAuthInfo)
+	if result.Error != nil {
+		return result.Error
+	}
 
-    userAuthInfo.PasswordHash = hashedNewPassword
-    result = store.db.Save(userAuthInfo)
-    if result.Error!= nil {
-        return result.Error
-    }
+	userAuthInfo.PasswordHash = hashedNewPassword
+	result = store.db.Save(userAuthInfo)
+	if result.Error != nil {
+		return result.Error
+	}
 
-    return nil
+	return nil
 }
 
-// UpdateUserInfo 更新用户信息。
+// UpdateUserInfoByUID 更新用户信息。
 //
 // 参数：
 //   - uid：用户ID
@@ -283,7 +290,7 @@ func (store *UserStore) UpdatePassword(username string, hashedNewPassword string
 //
 // 返回值：
 //   - error：如果在更新过程中发生错误，则返回相应的错误信息，否则返回nil。
-func (store *UserStore) UpdateUserInfo(uid uint64, updatedProfile *models.UserInfo) error {
+func (store *UserStore) UpdateUserInfoByUID(uid uint64, updatedProfile *models.UserInfo) error {
 	result := store.db.Model(updatedProfile).Where("id = ?", uid).Updates(updatedProfile)
-    return result.Error
+	return result.Error
 }
