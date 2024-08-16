@@ -241,7 +241,7 @@ func (store *UserStore) SaveUserAvatarByUID(uid uint64, fileName string, data []
 		return err
 	}
 
-	// 获取头像文件名
+	// 用户信息记录
 	user := new(models.UserInfo)
 	result := store.db.Where("id = ?", uid).First(user)
 	if result.Error != nil {

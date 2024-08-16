@@ -48,7 +48,6 @@ func NewUserProfileData(model *models.UserInfo) *UserProfileData {
 	var sb strings.Builder
 	sb.WriteString("/resources/avatar/")
 	sb.WriteString(model.Avatar)
-	sb.WriteString(".webp")
 	profile.Avatar = sb.String()
 
 	// 设置生日和性别
