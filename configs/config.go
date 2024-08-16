@@ -17,6 +17,8 @@ import (
 type Config struct {
 	// 服务器设置
 	Server struct {
+		// 服务器监听地址
+		Host string `toml:"host"`
 		// 服务器监听端口
 		Port int `toml:"port"`
 	} `toml:"server"`
