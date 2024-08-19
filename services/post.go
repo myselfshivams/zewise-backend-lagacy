@@ -1,7 +1,7 @@
 /*
-Package services provides the implementation of services
-responsible for managing posts in the micro-blog backend.
-Import the necessary package for the services.
+Package services - NekoBlog backend server services.
+This file is for user related services.
+Copyright (c) [2024], Author(s):
 - WhitePaper233<baizhiwp@gmail.com>
 - sjyhlxysybzdhxd<2023122308@jou.edu.cn>
 */
@@ -9,30 +9,34 @@ Import the necessary package for the services.
 package services
 
 import (
-	"github.com/Kirisakiii/neko-micro-blog-backend/models"
 	"github.com/Kirisakiii/neko-micro-blog-backend/stores"
+	"github.com/Kirisakiii/neko-micro-blog-backend/types"
 )
 
-// PostService 是一个结构体，代表微博后端中负责管理帖子的服务。
-// 它包含一个指向 PostStore 的引用，允许与与帖子相关的底层存储进行交互。
+// PostService 博文服务
 type PostService struct {
 	postStore *stores.PostStore
 }
 
-// NewPostService 是一个工厂方法，用于创建 PostService 的新实例。
+// PostService 返回一个新的 PostService 实例
 //
-// 返回值
-// 它初始化并返回一个 PostService，并关联了相应的 PostStore。
+// 返回值：
+//   - *PostService：新的 PostService 实力。
 func (factory *Factory) NewPostService() *PostService {
 	return &PostService{
 		postStore: factory.storeFactory.NewPostStore(),
 	}
 }
 
-func (service *PostService) GetPosts() ([]models.PostInfo, error) {
-	posts := []models.PostInfo{}
-	if err := service.postStore.PostFindStore(&posts); err != nil {
+// GetPostList 获取适用于用户查看的帖子信息列表。
+// 返回值：
+// - []models.UserPostInfo: 包含适用于用户查看的帖子信息的切片。
+// - error: 在获取帖子信息过程中遇到的任何错误，如果有的话。
+func (service *PostService) GetPostList() ([]types.UserPostInfo, error) {
+	var userPosts []types.UserPostInfo
+	var err error
+	if userPosts, err = service.postStore.GetPostList(); err != nil {
 		return nil, err
 	}
-	return posts, nil
+	return userPosts, nil
 }

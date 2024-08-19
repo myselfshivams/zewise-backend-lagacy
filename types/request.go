@@ -25,9 +25,14 @@ type UserUpdateProfileBody struct {
 	Gender   *string `json:"gender"`   // 性别
 }
 
-// Comm
+// CommentCreatebody 创建评论请求体
+type CommentCreateBody struct {
+	Username string `json:"username"` // 用户名
+	Content  string `json:"content"`  // 内容
+}
 
-type CommentCreatBody struct {
-	Username *string `json:"username"` // 用户名
-	Content  *string `json:"content"`  // 内容
+// UserPostInfo 创建博文请求体
+type UserPostInfo struct {
+	UID   uint   `json:"id"`    // 用户ID
+	Title string `json:"title"` // 标题
 }

@@ -1,7 +1,6 @@
 /*
-Package controllers provides the implementation of controllers
-responsible for handling and managing posts in the micro-blog backend.
-Import the necessary package for the controllers.
+Package controllers - NekoBlog backend server controllers.
+This file is for post controller, which is used to create handlee post related requests.
 Copyright (c) [2024], Author(s):
 - WhitePaper233<baizhiwp@gmail.com>
 - sjyhlxysybzdhxd<2023122308@jou.edu.cn>
@@ -9,36 +8,37 @@ Copyright (c) [2024], Author(s):
 package controllers
 
 import (
-	"github.com/Kirisakiii/neko-micro-blog-backend/services"
 	"github.com/gofiber/fiber/v2"
+	"github.com/Kirisakiii/neko-micro-blog-backend/services"
 )
 
-// PostController 是一个结构体，代表微博后端中负责管理和处理帖子的控制器。
-// 它包含一个指向 PostService 的引用，允许与与帖子相关的底层服务进行交互。
+// PostController 博文控制器结构体
 type PostController struct {
 	postService *services.PostService
 }
 
-// NewPostController 是一个工厂方法，用于创建 PostController 的新实例。
+// NewPostController 博文控制器工厂函数。
 //
-// 返回值
-// 它初始化并返回一个 PostController，并关联了相应的 PostService。
+// 返回值：
+// - *PostController 博文控制器指针
 func (factory *Factory) NewPostController() *PostController {
 	return &PostController{
 		postService: factory.serviceFactory.NewPostService(),
 	}
 }
 
-func (controller *PostController) NewPostListHandler() fiber.Handler {
+// NewListHandler 博文列表函数
+//
+// 返回值：
+// - fiber.Handle：新的博文列表函数
+func (controller *PostController) NewListHandler() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// Logic to retrieve the list of posts
-		posts, err := controller.postService.GetPosts()
+		posts, err := controller.postService.GetPostList()
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": err.Error(),
 			})
 		}
-
 		return c.JSON(posts)
 	}
 }

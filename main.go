@@ -149,7 +149,7 @@ func main() {
 	//post 路由
 	postController := controllerFactory.NewPostController()
 	post := api.Group("/post")
-	post.Get("st", postController.NewPostListHandler()) // 获取文章列表
+	post.Get("/post-list", postController.NewListHandler()) // 获取文章列表
 
 	// Comment 路由
 	commentController := controllerFactory.NewCommentController()

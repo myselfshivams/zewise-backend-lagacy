@@ -1,3 +1,10 @@
+/*
+Package services - NekoBlog backend server services.
+This file is for comment related services.
+Copyright (c) [2024], Author(s):
+- WhitePaper233<baizhiwp@gmail.com>
+- sjyhlxysybzdhxd<2023122308@jou.edu.cn>
+*/
 package services
 
 import (
