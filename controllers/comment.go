@@ -9,7 +9,6 @@ package controllers
 
 import (
 	"github.com/Kirisakiii/neko-micro-blog-backend/consts"
-	"github.com/Kirisakiii/neko-micro-blog-backend/models"
 	"github.com/Kirisakiii/neko-micro-blog-backend/services"
 	"github.com/Kirisakiii/neko-micro-blog-backend/types"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/serializers"
@@ -61,14 +60,8 @@ func (controller *CommentController) NewCreateCommentHandler() fiber.Handler {
 			)
 		}
 
-		// 创建评论
-		comment := &models.CommentInfo{
-			Content:  reqBody.Content,
-			Username: reqBody.Username,
-		}
-
 		// 调用服务方法创建评论
-		err = controller.commentService.NewCommentService(claims.UID, comment)
+		err = controller.commentService.NewCommentService(claims.UID, reqBody.Content, reqBody.Username)
 		if err != nil {
 			return ctx.Status(200).JSON(
 				serializers.NewResponse(consts.	SERVER_ERROR, err.Error()),
