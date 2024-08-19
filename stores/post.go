@@ -1,7 +1,7 @@
 /*
-Package stores provides the implementation of stores
-responsible for handling posts in the micro-blog backend.
-Import the necessary package for the store implementation.
+Package stores - NekoBlog backend server data access objects.
+This file is for post storage accessing.
+Copyright (c) [2024], Author(s):
 - WhitePaper233<baizhiwp@gmail.com>
 - sjyhlxysybzdhxd<2023122308@jou.edu.cn>
 */
@@ -9,11 +9,11 @@ package stores
 
 import (
 	"github.com/Kirisakiii/neko-micro-blog-backend/models"
+	"github.com/Kirisakiii/neko-micro-blog-backend/types"
 	"gorm.io/gorm"
 )
 
-// PostStore 是一个结构体，代表微博后端中负责处理帖子的存储。
-// 它包含一个指向 gorm.DB 的引用，允许与与帖子相关的数据库进行交互。
+// PostStore 博文信息数据库
 type PostStore struct {
 	db *gorm.DB
 }
@@ -29,9 +29,22 @@ func (factory *Factory) NewPostStore() *PostStore {
 	return &PostStore{factory.db}
 }
 
-func (store *PostStore) PostFindStore(posts *[]models.PostInfo) error {
-	if result := store.db.Find(posts); result.Error != nil {
-		return result.Error
+// GetPostLis 获取适用于用户查看的帖子信息列表。
+//
+// 返回值：
+// - []models.UserPostInfo: 包含适用于用户查看的帖子信息的切片。
+// - error: 在检索过程中遇到的任何错误，如果有的话。
+func (store *PostStore) GetPostList() ([]types.UserPostInfo, error) {
+	var posts []models.PostInfo
+	if result := store.db.Find(&posts); result.Error != nil {
+		return nil, result.Error
 	}
-	return nil
+	userPosts := make([]types.UserPostInfo, len(posts))
+	for i, post := range posts {
+		userPosts[i] = types.UserPostInfo{
+			UID:   post.ID,
+			Title: post.Title,
+		}
+	}
+	return userPosts, nil
 }

@@ -1,3 +1,10 @@
+/*
+Package controllers - NekoBlog backend server controllers.
+This file is for comment controller, which is used to create handlee comment related requests.
+Copyright (c) [2024], Author(s):
+- WhitePaper233<baizhiwp@gmail.com>
+- sjyhlxysybzdhxd<2023122308@jou.edu.cn>
+*/
 package controllers
 
 import (
@@ -31,7 +38,7 @@ func (factory *Factory) NewCommentController() *CommentController {
 func (controller *CommentController) NewCreateCommentHandler() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		// 解析请求体
-		reqBody := new(types.CommentCreatBody)
+		reqBody := new(types.CommentCreateBody)
 		err := ctx.BodyParser(reqBody)
 		if err != nil {
 			return ctx.Status(200).JSON(
@@ -39,13 +46,20 @@ func (controller *CommentController) NewCreateCommentHandler() fiber.Handler {
 			)
 		}
 
+		// 校验参数
+		if reqBody.Content == "" || reqBody.Username == "" {
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(consts.PARAMETER_ERROR, "content or user_id is required"),
+			)
+		}
+
 		// 获取Token Claims
 		claims := ctx.Locals("claims").(*types.BearerTokenClaims)
 		if claims == nil {
-            return ctx.Status(200).JSON(
-                serializers.NewResponse(consts.AUTH_ERROR, "bearer token is not avaliable"),
-            )
-        }
+			return ctx.Status(200).JSON(
+				serializers.NewResponse(consts.AUTH_ERROR, "bearer token is not avaliable"),
+			)
+		}
 
 		// 创建评论
 		comment := &models.CommentInfo{
@@ -53,19 +67,11 @@ func (controller *CommentController) NewCreateCommentHandler() fiber.Handler {
 			Username: reqBody.Username,
 		}
 
-		// 验证参数合法性
-		if comment.Username == nil || comment.Content == nil {
-			// 如果Username或Content为空，返回参数错误
-			return ctx.Status(200).JSON(
-				serializers.NewResponse(consts.PARAMETER_ERROR, "Username or Content is missing"),
-			)
-		}
-
 		// 调用服务方法创建评论
-		err = controller.commentService.NewCommentService(claims.UID,comment)
+		err = controller.commentService.NewCommentService(claims.UID, comment)
 		if err != nil {
 			return ctx.Status(200).JSON(
-				serializers.NewResponse(consts.PARAMETER_ERROR, err.Error()),
+				serializers.NewResponse(consts.	SERVER_ERROR, err.Error()),
 			)
 		}
 
