@@ -15,13 +15,13 @@ import (
 // UserInfo 用户信息模型
 type UserInfo struct {
 	gorm.Model            // 基本模型
-	UserName   string     `gorm:"unique;column:username"`             // 用户名
-	NickName   *string    `gorm:"column:nickname"`                    // 昵称
-	Avatar     string     `gorm:"default:vanilla.webp;column:avatar"` // 头像
-	Birth      *time.Time `gorm:"column:birth"`                       // 生日
-	Gender     *string    `gorm:"column:gender"`                      // 性别
-	Authority  uint64     `gorm:"default:0;column:authority"`         // 权限等级
-	Level      uint64     `gorm:"default:1;column:level"`             // 等级
+	UserName   string     `gorm:"unique;column:username"`        // 用户名
+	NickName   *string    `gorm:"column:nickname"`               // 昵称
+	Avatar     string     `gorm:"default:vanilla;column:avatar"` // 头像
+	Birth      *time.Time `gorm:"column:birth"`                  // 生日
+	Gender     *string    `gorm:"column:gender"`                 // 性别
+	Authority  uint64     `gorm:"default:0;column:authority"`    // 权限等级
+	Level      uint64     `gorm:"default:1;column:level"`        // 等级
 }
 
 // UserAuthInfo 用户认证信息模型

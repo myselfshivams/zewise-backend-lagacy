@@ -8,16 +8,14 @@ Copyright (c) [2024], Author(s):
 package services
 
 import (
-	"github.com/Kirisakiii/neko-micro-blog-backend/stores"
 	"github.com/Kirisakiii/neko-micro-blog-backend/models"
+	"github.com/Kirisakiii/neko-micro-blog-backend/stores"
 )
-
 
 // CommentService 评论服务
 type CommentService struct {
 	commentStore *stores.CommentStore
 }
-
 
 // NewCommentService 返回一个新的评论服务实例。
 // 返回：
@@ -34,16 +32,19 @@ func (factory *Factory) NewCommentService() *CommentService {
 // 返回值：
 //      -error
 
-func (service *CommentService) NewCommentService(uid uint64,comment *models.CommentInfo) error {
+func (service *CommentService) NewCommentService(uid uint64, comments string, username string) error {
 
-    // 调用存储层的方法存储评论
-    err := service.commentStore.NewCommentStore(uid,comment)
-    if err != nil {
-        // 处理错误
-        return err
-    }
-    return nil
+	// 创建评论
+	comment := &models.CommentInfo{
+		Content:  comments,
+		Username: username,
+	}
+
+	// 调用存储层的方法存储评论
+	err := service.commentStore.NewCommentStore(uid, comment)
+	if err != nil {
+		// 处理错误
+		return err
+	}
+	return nil
 }
-
-
-
