@@ -1,36 +1,42 @@
-package middleware
+/*
+Package middlewares - NekoBlog backend server middlewares.
+This file is for token authentication middleware.
+Copyright (c) [2024], Author(s):
+- WhitePaper233<baizhiwp@gmail.com>
+*/
+package middlewares
 
 import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Kirisakiii/neko-micro-blog-backend/consts"
 	"github.com/Kirisakiii/neko-micro-blog-backend/stores"
-	"github.com/Kirisakiii/neko-micro-blog-backend/utils/parser"
+	"github.com/Kirisakiii/neko-micro-blog-backend/utils/parsers"
 	"github.com/Kirisakiii/neko-micro-blog-backend/utils/serializers"
-	"github.com/Kirisakiii/neko-micro-blog-backend/utils/valider"
+	"github.com/Kirisakiii/neko-micro-blog-backend/utils/validers"
 )
 
-// AuthMiddleware 认证中间件
-type AuthMiddleware struct {
+// TokenAuthMiddleware 认证中间件
+type TokenAuthMiddleware struct {
 	userStore *stores.UserStore
 }
 
-// NewAuthMiddleware 返回一个新的 AuthMiddleware 实例。
+// NewTokenAuthMiddleware 返回一个新的 AuthMiddleware 实例。
 //
 // 返回值
 //   - *AuthMiddleware：新的 AuthMiddleware 实例。
-func (factory *Factory) NewAuthMiddleware() *AuthMiddleware {
-	return &AuthMiddleware{userStore: factory.store.NewUserStore()}
+func (factory *Factory) NewTokenAuthMiddleware() *TokenAuthMiddleware {
+	return &TokenAuthMiddleware{userStore: factory.store.NewUserStore()}
 }
 
-// NewTokenAuth Token 认证中间件
+// NewMiddleware Token 认证中间件
 //
 // 参数
 //   - ctx：Fiber 上下文。
 //
 // 返回值
 //   - error：错误
-func (middleware *AuthMiddleware) NewTokenAuth() fiber.Handler {
+func (middleware *TokenAuthMiddleware) NewMiddleware() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		// 从请求头中获取 Token
 		token := ctx.Get("Authorization")
@@ -47,7 +53,7 @@ func (middleware *AuthMiddleware) NewTokenAuth() fiber.Handler {
 		token = token[7:]
 
 		// 验证 Token
-		claims, err := parser.ParseToken(token)
+		claims, err := parsers.ParseToken(token)
 		if err != nil {
 			return ctx.Status(200).JSON(
 				serializers.NewResponse(consts.AUTH_ERROR, err.Error()),
@@ -55,14 +61,14 @@ func (middleware *AuthMiddleware) NewTokenAuth() fiber.Handler {
 		}
 
 		// 检验 Token 是否在有效期内
-		if !valider.ValideTokenClaims(claims) {
+		if !validers.ValideTokenClaims(claims) {
 			return ctx.Status(200).JSON(
 				serializers.NewResponse(consts.AUTH_ERROR, "bearer token is expired"),
 			)
 		}
 
 		// 检验 Token 是否可用
-		isAvaliable, err := middleware.userStore.IsTokenAvaliable(token)
+		isAvaliable, err := middleware.userStore.IsUserTokenAvaliable(token)
 		if err != nil {
 			return ctx.Status(200).JSON(
 				serializers.NewResponse(consts.SERVER_ERROR, err.Error()),

@@ -1,4 +1,10 @@
-package converter
+/*
+Package converters - NekoBlog backend server data converters.
+This file is for avatar file converter.
+Copyright (c) [2024], Author(s):
+- WhitePaper233<baizhiwp@gmail.com>
+*/
+package converters
 
 import (
 	"image"

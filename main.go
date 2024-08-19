@@ -13,10 +13,10 @@ import (
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
 
-	"github.com/Kirisakiii/neko-micro-blog-backend/config"
+	"github.com/Kirisakiii/neko-micro-blog-backend/configs"
 	"github.com/Kirisakiii/neko-micro-blog-backend/controllers"
 	"github.com/Kirisakiii/neko-micro-blog-backend/loggers"
-	"github.com/Kirisakiii/neko-micro-blog-backend/middleware"
+	"github.com/Kirisakiii/neko-micro-blog-backend/middlewares"
 	"github.com/Kirisakiii/neko-micro-blog-backend/models"
 	"github.com/Kirisakiii/neko-micro-blog-backend/services"
 	"github.com/Kirisakiii/neko-micro-blog-backend/stores"
@@ -24,11 +24,11 @@ import (
 
 var (
 	logger            *logrus.Logger
-	cfg               *config.Config
+	cfg               *configs.Config
 	db                *gorm.DB
 	storeFactory      *stores.Factory
 	controllerFactory *controllers.Factory
-	middlewareFactory *middleware.Factory
+	middlewareFactory *middlewares.Factory
 )
 
 func init() {
@@ -39,7 +39,7 @@ func init() {
 	var err error
 
 	// 加载配置文件
-	cfg, err = config.NewConfig()
+	cfg, err = configs.NewConfig()
 	if err != nil {
 		logger.Panicln(err.Error())
 	}
@@ -101,11 +101,21 @@ func init() {
 	)
 
 	// 建立中间件工厂
-	middlewareFactory = middleware.NewFactory(storeFactory)
+	middlewareFactory = middlewares.NewFactory(storeFactory)
 }
 
 func main() {
-	app := fiber.New()
+	// 创建 fiber 实例
+	var fiberConfig fiber.Config
+	// 如果是生产环境，则开启 Prefork
+	if cfg.Env.Type == "production" {
+		fiberConfig = fiber.Config{
+			Prefork: true,
+		}
+	}
+	app := fiber.New(fiberConfig)
+
+	// 设置中间件
 	app.Use(fiberLogger.New(fiberLogger.Config{
 		Format: "[${time}][${latency}][${status}][${method}] ${path}\n",
 	}))
@@ -114,7 +124,7 @@ func main() {
 	}))
 
 	// Auth 中间件
-	authMiddleware := middlewareFactory.NewAuthMiddleware()
+	authMiddleware := middlewareFactory.NewTokenAuthMiddleware()
 
 	// 静态资源路由
 	resource := app.Group("/resources")
@@ -129,10 +139,12 @@ func main() {
 	// User 路由
 	userController := controllerFactory.NewUserController()
 	user := api.Group("/user")
-	user.Get("/profile", userController.NewProfileHandler())                                            // 查询用户信息
-	user.Post("/register", userController.NewRegisterHandler())                                         // 用户注册
-	user.Post("/login", userController.NewLoginHandler())                                               // 用户登录
-	user.Post("/upload-avatar", authMiddleware.NewTokenAuth(), userController.NewUploadAvatarHandler()) // 上传头像
+	user.Get("/profile", userController.NewProfileHandler())                                             // 查询用户信息
+	user.Post("/register", userController.NewRegisterHandler())                                          // 用户注册
+	user.Post("/login", userController.NewLoginHandler())                                                // 用户登录
+	user.Post("/upload-avatar", authMiddleware.NewMiddleware(), userController.NewUploadAvatarHandler()) // 上传头像
+	user.Post("/update-psw", userController.NewUpdatePasswordHandler())                                  // 修改密码
+	user.Post("/edit", authMiddleware.NewMiddleware(), userController.NewUpdateProfileHandler())         // 修改用户资料
 
-	log.Fatal(app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)))
+	log.Fatal(app.Listen(fmt.Sprintf("%s:%d", cfg.Database.Host, cfg.Server.Port)))
 }

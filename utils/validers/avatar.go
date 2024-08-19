@@ -1,4 +1,10 @@
-package valider
+/*
+Package validers - NekoBlog backend server data validation.
+This file is for avatar file validation.
+Copyright (c) [2024], Author(s):
+- WhitePaper233<baizhiwp@gmail.com>
+*/
+package validers
 
 import (
 	"errors"

@@ -1,9 +1,15 @@
+/*
+Package consts - NekoBlog backend server constants.
+This file is for response code related constants.
+Copyright (c) [2024], Author(s):
+- WhitePaper233<baizhiwp@gmail.com>
+*/
 package consts
 
 import "github.com/Kirisakiii/neko-micro-blog-backend/utils/serializers"
 
 const (
-	// Success 成功
+	// SUCCESS 成功
 	SUCCESS serializers.ResponseCode = 0
 
 	// SERVER_ERROR 服务器错误
