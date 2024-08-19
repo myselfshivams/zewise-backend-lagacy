@@ -3,7 +3,6 @@ Package controllers - NekoBlog backend server controllers.
 This file is for factory of controllers.
 Copyright (c) [2024], Author(s):
 - WhitePaper233<baizhiwp@gmail.com>
-- sjyhlxysybzdhxd<2023122308@jou.edu.cn>
 */
 package controllers
 
@@ -20,6 +19,3 @@ type Factory struct {
 func NewFactory(serviceFactory *services.Factory) *Factory {
 	return &Factory{serviceFactory: serviceFactory}
 }
-
-
-
