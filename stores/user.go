@@ -20,6 +20,7 @@ import (
 	"github.com/Kirisakiii/neko-micro-blog-backend/types"
 )
 
+
 // UserStore 用户信息数据库
 type UserStore struct {
 	db *gorm.DB
