@@ -26,13 +26,31 @@ type UserUpdateProfileBody struct {
 }
 
 // CommentCreatebody 创建评论请求体
-type CommentCreateBody struct {
-	Username string `json:"username"` // 用户名
-	Content  string `json:"content"`  // 内容
+type UserCommentCreateBody struct {
+	PostID  *uint64 `json:"post_id" form:"post_id"` // 博文ID
+	Content string  `json:"content" form:"content"` // 内容
+}
+
+// UserCommentUpdateBody 更新评论请求体
+type UserCommentUpdateBody struct {
+	CommentID *uint64 `json:"comment_id" form:"comment_id"` // 评论ID
+	Content   string  `json:"content" form:"content"`       // 内容
 }
 
 // UserPostInfo 创建博文请求体
 type UserPostInfo struct {
 	UID   uint   `json:"id"`    // 用户ID
 	Title string `json:"title"` // 标题
+
+}
+
+// PostCreateBody 创建博文请求体
+type PostCreateBody struct {
+	Title   string `json:"title" form:"title"`     //标题
+	Content string `json:"content" form:"content"` //内容
+}
+
+// UserPostInfo 创建博文请求体
+type UserCommentDeleteBody struct {
+	CommentID *uint64 `json:"comment_id" form:"comment_id"` // 评论ID
 }

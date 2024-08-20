@@ -14,6 +14,7 @@ import (
 	gormLogger "gorm.io/gorm/logger"
 
 	"github.com/Kirisakiii/neko-micro-blog-backend/configs"
+	"github.com/Kirisakiii/neko-micro-blog-backend/consts"
 	"github.com/Kirisakiii/neko-micro-blog-backend/controllers"
 	"github.com/Kirisakiii/neko-micro-blog-backend/loggers"
 	"github.com/Kirisakiii/neko-micro-blog-backend/middlewares"
@@ -113,6 +114,7 @@ func main() {
 			Prefork: true,
 		}
 	}
+	fiberConfig.BodyLimit = 10 * consts.POST_IMAGE_MAX_FILE_SIZE
 	app := fiber.New(fiberConfig)
 
 	// 设置中间件
@@ -132,6 +134,10 @@ func main() {
 	resource.Static("/avatar", "./public/avatars", fiber.Static{
 		Compress: true,
 	})
+	// 博文图片资源路由
+	resource.Static("/image", "./public/images", fiber.Static{
+		Compress: true,
+	})
 
 	// api 路由
 	api := app.Group("/api")
@@ -149,12 +155,20 @@ func main() {
 	//post 路由
 	postController := controllerFactory.NewPostController()
 	post := api.Group("/post")
-	post.Get("/post-list", postController.NewListHandler()) // 获取文章列表
+	post.Post("/new", authMiddleware.NewMiddleware(), postController.NewCreatePostHandler())            // 创建文章
+	post.Get("/list", postController.NewPostListHandler())                                              // 获取文章列表
+	post.Get("/detail", postController.NewPostDetailHandler())                                          // 获取文章信息
+	post.Delete("/delete/:post", authMiddleware.NewMiddleware(), postController.NewDeletePostHandler()) // 删除文章
 
 	// Comment 路由
 	commentController := controllerFactory.NewCommentController()
 	comment := api.Group("/comment")
-	comment.Post("/new", authMiddleware.NewMiddleware(), commentController.NewCreateCommentHandler()) // 创建评论
+	comment.Post("/new", authMiddleware.NewMiddleware(), commentController.NewCreateCommentHandler(storeFactory.NewPostStore(), storeFactory.NewUserStore())) // 创建评论
+	comment.Post("/edit", authMiddleware.NewMiddleware(), commentController.NewUpdateCommentHandler())                                                        // 修改评论
+	comment.Post("/delete", authMiddleware.NewMiddleware(), commentController.DeleteCommentHandler())                                                         // 删除评论
+	comment.Get("/list", commentController.NewCommentListHandler())                                                                                           // 获取评论列表
+	comment.Get("/detail", commentController.NewCommentDetailHandler())
 
+	// 启动服务器
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)))
 }
