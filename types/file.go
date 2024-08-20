@@ -6,20 +6,20 @@ Copyright (c) [2024], Author(s):
 */
 package types
 
-// AvatarFileType 头像文件类型
-type AvatarFileType int
+// ImageFileType 图像文件类型
+type ImageFileType int
 
 // 头像文件类型
 const (
-	// AVATAR_FILE_TYPE_UNKNOWN 未知头像文件类型
-	AVATAR_FILE_TYPE_UNKNOWN AvatarFileType = -1
+	// IMAGE_FILE_TYPE_UNKNOWN 未知头像文件类型
+	IMAGE_FILE_TYPE_UNKNOWN ImageFileType = -1
 
-	// AVATAR_FILE_TYPE_WEBP WebP 格式的头像文件
-	AVATAR_FILE_TYPE_WEBP AvatarFileType = iota
+	// IMAGE_FILE_TYPE_WEBP WebP 格式的头像文件
+	IMAGE_FILE_TYPE_WEBP ImageFileType = iota
 
-	// AVATAR_FILE_TYPE_JPEG JPEG 格式的头像文件
-	AVATAR_FILE_TYPE_JPEG
-	
-	// AVATAR_FILE_TYPE_PNG PNG 格式的头像文件
-	AVATAR_FILE_TYPE_PNG
+	// IMAGE_FILE_TYPE_JPEG JPEG 格式的头像文件
+	IMAGE_FILE_TYPE_JPEG
+
+	// IMAGE_FILE_TYPE_PNG PNG 格式的头像文件
+	IMAGE_FILE_TYPE_PNG
 )

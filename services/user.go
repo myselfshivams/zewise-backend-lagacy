@@ -217,13 +217,19 @@ func (service *UserService) UserUploadAvatar(uid uint64, fileHeader *multipart.F
 	defer file.Close()
 
 	// 校验头像
-	fileType, err := validers.ValidAvatarFile(fileHeader, &file)
+	fileType, err := validers.ValidImageFile(
+		fileHeader, 
+		&file, 
+		consts.MIN_AVATAR_SIZE, 
+		consts.MIN_AVATAR_SIZE, 
+		consts.MAX_AVATAR_FILE_SIZE,
+	)
 	if err != nil {
 		return err
 	}
 
 	// 缩放头像
-	resizedAvatar, err := converters.ResizeAvatar(fileType, &file, consts.STANDERED_AVATAR_SIZE)
+	resizedAvatar, err := converters.ResizeAvatar(fileType, &file)
 	if err != nil {
 		return err
 	}
