@@ -170,5 +170,5 @@ func main() {
 	comment.Get("/detail", commentController.NewCommentDetailHandler())
 
 	// 启动服务器
-	log.Fatal(app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)))
+	log.Fatal(app.Listen(fmt.Sprintf("%s:%d", cfg.Database.Host, cfg.Server.Port)))
 }
