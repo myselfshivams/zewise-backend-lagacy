@@ -17,6 +17,10 @@ import "gorm.io/gorm"
 //	- error 错误
 func Migrate(db *gorm.DB) error {
 	var err error
+	// cron 相关
+	if err = db.AutoMigrate(&AvatarDeletionWaitList{}); err != nil {
+		return err
+	}
 
 	// User 相关
 	if err = db.AutoMigrate(&UserInfo{}); err != nil {

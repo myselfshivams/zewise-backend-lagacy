@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -248,6 +249,13 @@ func (store *UserStore) SaveUserAvatarByUID(uid uint64, fileName string, data []
 		return result.Error
 	}
 
+	// 将旧头像文件加入清理队列
+	if user.Avatar != "vanilla.webp" {
+		store.db.Create(&models.AvatarDeletionWaitList{
+			FileName: user.Avatar,
+		})
+	}
+
 	// 更新头像文件名
 	user.Avatar = fileName
 	result = store.db.Save(user)
@@ -291,6 +299,16 @@ func (store *UserStore) UpdateUserPasswordByUsername(username string, hashedNewP
 // 返回值：
 //   - error：如果在更新过程中发生错误，则返回相应的错误信息，否则返回nil。
 func (store *UserStore) UpdateUserInfoByUID(uid uint64, updatedProfile *models.UserInfo) error {
-	result := store.db.Model(updatedProfile).Where("id = ?", uid).Updates(updatedProfile)
-	return result.Error
+	var userProfile models.UserInfo
+	result := store.db.Where("id = ?", uid).First(&userProfile)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	userProfile.UpdatedAt = time.Now()
+	userProfile.NickName = updatedProfile.NickName
+	userProfile.Birth = updatedProfile.Birth
+	userProfile.Gender = updatedProfile.Gender
+
+	return store.db.Save(&userProfile).Error
 }

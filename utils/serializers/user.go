@@ -14,13 +14,13 @@ import (
 
 // UserProfileData 用户资料响应结构。
 type UserProfileData struct {
-	UID      uint64 `json:"uid"`        // 用户 ID
-	Username string `json:"username"`   // 用户名
-	Nickname string `json:"nickname"`   // 昵称
-	Avatar   string `json:"avatar_url"` // 头像 URL
-	Birth    string `json:"birth"`      // 生日
-	Gender   string `json:"gender"`     // 性别
-	Level    uint64 `json:"level"`      // 等级
+	UID      uint64  `json:"uid"`        // 用户 ID
+	Username string  `json:"username"`   // 用户名
+	Nickname string  `json:"nickname"`   // 昵称
+	Avatar   string  `json:"avatar_url"` // 头像 URL
+	Birth    *int64  `json:"birth"`      // 生日
+	Gender   *string `json:"gender"`     // 性别
+	Level    uint64  `json:"level"`      // 等级
 }
 
 // NewUserProfileData 创建一个新的用户资料响应。
@@ -53,14 +53,15 @@ func NewUserProfileData(model *models.UserInfo) *UserProfileData {
 	// 设置生日和性别
 	// 如果生日和性别为空，则设置为未知
 	if model.Birth != nil {
-		profile.Birth = model.Birth.Format("2006-01-02")
+		birth := model.Birth.Unix()
+		profile.Birth = &birth
 	} else {
-		profile.Birth = "未知"
+		profile.Birth = nil
 	}
 	if model.Gender != nil {
-		profile.Gender = *model.Gender
+		profile.Gender = model.Gender
 	} else {
-		profile.Gender = "未知"
+		profile.Gender = nil
 	}
 	profile.Level = model.Level
 
