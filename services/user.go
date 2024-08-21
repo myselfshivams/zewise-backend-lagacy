@@ -48,6 +48,7 @@ func (factory *Factory) NewUserService() *UserService {
 //
 // 返回值：
 //   - *models.UserInfo：用户信息模型。
+//   - error：如果在获取过程中发生错误，则返回相应的错误信息，否则返回nil。
 func (service *UserService) GetUserInfoByUID(uid uint64) (*models.UserInfo, error) {
 	user, err := service.userStore.GetUserByUID(uid)
 	if err != nil {
@@ -64,6 +65,7 @@ func (service *UserService) GetUserInfoByUID(uid uint64) (*models.UserInfo, erro
 //
 // 返回值：
 //   - *models.UserInfo：用户信息模型。
+//   - error：如果在获取过程中发生错误，则返回相应的错误信息，否则返回nil。
 func (service *UserService) GetUserInfoByUsername(username string) (*models.UserInfo, error) {
 	user, err := service.userStore.GetUserByUsername(username)
 	if err != nil {
@@ -217,19 +219,13 @@ func (service *UserService) UserUploadAvatar(uid uint64, fileHeader *multipart.F
 	defer file.Close()
 
 	// 校验头像
-	fileType, err := validers.ValidImageFile(
-		fileHeader, 
-		&file, 
-		consts.MIN_AVATAR_SIZE, 
-		consts.MIN_AVATAR_SIZE, 
-		consts.MAX_AVATAR_FILE_SIZE,
-	)
+	fileType, err := validers.ValidAvatarFile(fileHeader, &file)
 	if err != nil {
 		return err
 	}
 
 	// 缩放头像
-	resizedAvatar, err := converters.ResizeAvatar(fileType, &file)
+	resizedAvatar, err := converters.ResizeAvatar(fileType, &file, consts.STANDERED_AVATAR_SIZE)
 	if err != nil {
 		return err
 	}
@@ -237,6 +233,8 @@ func (service *UserService) UserUploadAvatar(uid uint64, fileHeader *multipart.F
 	// 保存头像
 	var sb strings.Builder
 	sb.WriteString(strconv.FormatUint(uid, 10))
+	sb.WriteRune('_')
+	sb.WriteString(strconv.FormatInt(time.Now().Unix(), 10))
 	sb.WriteString(".webp")
 
 	return service.userStore.SaveUserAvatarByUID(uid, sb.String(), resizedAvatar)
@@ -290,17 +288,19 @@ func (service *UserService) UserUpdatePassword(username string, password string,
 //   - error：如果在更新过程中发生错误，则返回相应的错误信息，否则返回nil。
 func (service *UserService) UpdateUserInfo(uid uint64, reqBody *types.UserUpdateProfileBody) error {
 	// 构造更新Profile结构体
-	updatedProfile := &models.UserInfo{}
-	if reqBody.NickName != nil {
-		updatedProfile.NickName = reqBody.NickName
+	updatedProfile := &models.UserInfo{
+		NickName: reqBody.NickName,
 	}
+
 	if reqBody.Birth != nil {
 		birth := time.Unix(int64(*reqBody.Birth), 0)
 		updatedProfile.Birth = &birth
+	} else {
+		updatedProfile.Birth = nil
 	}
 	if reqBody.Gender != nil {
 		if *reqBody.Gender != "male" && *reqBody.Gender != "female" {
-			updatedProfile.Gender = reqBody.Gender
+			updatedProfile.Gender = nil
 		} else {
 			updatedProfile.Gender = reqBody.Gender
 		}

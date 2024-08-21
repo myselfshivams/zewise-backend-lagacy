@@ -13,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// LoggerFormatter 日志格式化器1
+// LoggerFormatter 日志格式化器
 type LoggerFormatter struct {
 }
 
