@@ -17,5 +17,5 @@ const (
 	STANDERED_AVATAR_SIZE = 256
 
 	// AVATAR_QUALITY 头像文件的质量
-	AVATAR_QUALITY float32 = 80
+	QUALITY float32 = 80
 )
