@@ -91,7 +91,7 @@ func (controller *UserController) NewProfileHandler() fiber.Handler {
 
 		// 返回结果
 		return ctx.Status(200).JSON(
-			serializers.NewResponse(consts.SUCCESS, "", serializers.NewUserProfileData(user)),
+			serializers.NewResponse(consts.SUCCESS, "succeed", serializers.NewUserProfileData(user)),
 		)
 	}
 }
@@ -224,7 +224,7 @@ func (controller *UserController) NewUploadAvatarHandler() fiber.Handler {
 //	NewUserUpdatePassword 修改密码的函数
 //
 // 返回值：
-//   - fiber.Handler：新的上传头像的处理函数。
+//   - fiber.Handler：新密码的处理函数。
 func (controller *UserController) NewUpdatePasswordHandler() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		// 解析请求体
