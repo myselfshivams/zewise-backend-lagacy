@@ -110,7 +110,7 @@ func init() {
 func main() {
 	// 创建定时任务
 	crontab := cron.New()
-	crontab.AddJob(
+	_, err := crontab.AddJob(
 		"@every 5min",
 		cron.NewChain(
 			cron.SkipIfStillRunning(cron.DefaultLogger),
@@ -118,6 +118,9 @@ func main() {
 			rontines.NewAvatarCleanerJob(logger, db),
 		),
 	)
+	if err != nil {
+		logger.Panicln(err.Error())
+	}
 	crontab.Start()
 
 	// 创建 fiber 实例
