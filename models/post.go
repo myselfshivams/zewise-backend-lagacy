@@ -16,7 +16,6 @@ type PostInfo struct {
 	gorm.Model                  // 基本模型
 	ParentPostID *uint64        `gorm:"column:parent_post_id"`         // 转发自文章ID
 	UID          uint64         `gorm:"column:uid"`                    // 用户ID
-	Username     string         `gorm:"column:username"`               // 用户名
 	IpAddrress   *string        `gorm:"column:ip_address"`             // IP地址
 	Title        string         `gorm:"column:title"`                  // 标题
 	Content      string         `gorm:"column:content"`                // 内容

@@ -23,3 +23,5 @@ type CommentInfo struct {
 	IsPublic   bool          `gorm:"column:is_public;default:true"` // 是否公开
 	// Share   uint64 `gorm:"column:share"`                         // 分享数 暂时不实现
 }
+
+
