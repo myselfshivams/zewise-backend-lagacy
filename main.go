@@ -111,7 +111,7 @@ func main() {
 	// 创建定时任务
 	crontab := cron.New()
 	_, err := crontab.AddJob(
-		"@every 5min",
+		"@every 5m",
 		cron.NewChain(
 			cron.SkipIfStillRunning(cron.DefaultLogger),
 		).Then(
